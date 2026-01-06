@@ -1,0 +1,69 @@
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{graphicx}
+\graphicspath{{../figures/}}
+\usepackage{charter} % Font scelto per il documento
+\usepackage{microtype}  % Migliora la qualità tipografica
+\usepackage{titling}    % Per personalizzare il titolo
+\usepackage[a4paper, margin=2cm]{geometry} % Imposta i margini
+\usepackage{setspace} % Per gestire l'interlinea
+\setstretch{1.1}  % interlinea di 1.1
+\usepackage{enumitem}
+\setlist{nolistsep} % Rimuove lo spazio tra gli elementi della lista
+\usepackage{float} % Da inserire nel preambolo
+\usepackage{wrapfig} % Pacchetto per posizionare testo e immagine affiancati
+\usepackage{subfig} % Pacchetto per affiancare immagini
+\renewcommand{\thefigure}{\arabic{figure}}
+\setcounter{figure}{0}
+\usepackage{xr} % Serve per poter vedere le numerazioni corrette ai riferimenti dei capitoli, nonostante stia compilando capitoli singoli
+\usepackage[hidelinks]{hyperref}  % 'hidelinks' rimuove i bordi rossi
+\usepackage{booktabs} % Per migliorare la qualità della tabella
+\usepackage{array}    % Per una migliore gestione delle colonne
+\usepackage{tabularx} %per mettere più tabbella su una riga
+\usepackage{placeins}
+\usepackage{colortbl} % Required for \rowcolor
+\usepackage{tikz}
+\usetikzlibrary{positioning, shapes.geometric}
+\usepackage{amssymb}
+\usepackage{changepage}
+
+%Diego package
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\renewcommand{\thealgorithm}{}
+\floatname{algorithm}{}
+\usepackage{amsmath}
+\usepackage{mathtools}
+
+\usepackage[most]{tcolorbox}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[utf8]{inputenc}
+
+\usepackage{subfiles} % Questo pacchetto ti permette di trattare ogni capitolo come un documento autonomo che "eredita" il preambolo dal file principale
+
+% Definizione colori personalizzati
+\definecolor{codebg}{RGB}{245, 245, 245} % Sfondo grigio chiaro
+\definecolor{codeborder}{RGB}{200, 200, 200} % Bordo grigio più scuro
+\definecolor{keywordcolor}{RGB}{0, 102, 204} % Blu per le parole chiave
+\definecolor{commentcolor}{RGB}{0, 153, 0} % Verde per i commenti
+\definecolor{stringcolor}{RGB}{204, 51, 0} % Rosso per le stringhe
+\definecolor{typenames}{RGB}{128, 0, 128} % Viola per i tipi di dato
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{codebg}, % Sfondo grigio chiaro
+    frame=single, % Bordo attorno al codice
+    rulecolor=\color{codeborder}, % Colore del bordo
+    basicstyle=\fontfamily{pcr}\selectfont\small, % Usa il font Courier che supporta il grassetto
+    keywordstyle=\color{keywordcolor}\bfseries, % Parole chiave in blu e grassetto
+    commentstyle=\color{commentcolor}\itshape, % Commenti in verde e italico
+    stringstyle=\color{stringcolor}, % Stringhe in rosso
+    identifierstyle=\color{black}, % Identificatori normali in nero
+    numberstyle=\tiny\color{gray}, % Numeri di riga in grigio
+    tabsize=4, % Grandezza del tab
+    showstringspaces=false, % Nasconde gli spazi nelle stringhe
+    breaklines=true, % Permette di andare a capo automaticamente
+    morekeywords={uint8_t, uint16_t, uint32_t, size_t}, % Aggiunta di tipi standard del C
+    escapeinside={(*@}{@*)}, % Definisce i caratteri di escape per inserire comandi LaTeX
+}
