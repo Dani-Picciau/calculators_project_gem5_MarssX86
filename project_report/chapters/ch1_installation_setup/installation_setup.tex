@@ -4,7 +4,7 @@
 \begin{document}
 \section{Installazione e setup dei simulatori per Windows e macOS}
 \subsection{Premessa fondamentale: architetture e compatibilità}
-\label{ch1:par:paragrafo_1_1}
+\label{par:paragrafo_1_1}
 Prima di procedere, è essenziale capire che questi simulatori non sono normali applicazioni installabili con un semplice clic. Entrambi sono nati in ambito accademico per Linux, ma hanno esigenze molto diverse legate alla loro "età".
 
 \vspace{8pt}
@@ -28,17 +28,27 @@ Bisogna anche considerare che, anche avendo un sistema Linux (o Unix), c'è il p
 \subsection{Installazione e setup del simulatore Gem5}
 Per quanto riguarda l'installazione del simulatore Gem5, la soluzione varia leggermente a seconda del sistema operativo utilizzato.
 \subsubsection{Installazione e setup di Gem5 su Windows}
-Per installare il simulatore su Windows la soluzione migliore è \textbf{WSL} (Windows Subsystem for Linux). Questo sottosistema permette di avere un terminale Ubuntu vero e proprio integrato in Windows. Dunque, l'installazione si compone di diversi passaggi:
+\label{par:ch_1.2.1}
+Per installare il simulatore su Windows la soluzione consigliata è \textbf{WSL} (Windows Subsystem for Linux). Questo sottosistema permette di avere un terminale Ubuntu vero e proprio integrato in Windows. Dunque, l'installazione si compone di diversi passaggi:
 \begin{itemize}[leftmargin=1em]
     \item \textbf{\textit{Passo 1}: attivazione di WSL}
     \begin{enumerate}[leftmargin=1.3em]
         \item Aprire la \textbf{PowerShell} come amministratore;
-        \item Digitare \cmd{\texttt{wsl ---install}} e premere invio;
-        \item Attendere il download e, una volta completato, riavvare il computer;
-        \item Al riavvio, seguire le istruzioni a schermo per creare \textit{username} e \textit{password} Ubuntu.
+        \item Digitare \cmd{\texttt{wsl ---install}}, premere invio e attendere il compleatmento del download;
+        \item Al termine, seguire le istruzioni a schermo per creare \textit{username} e \textit{password} Ubuntu.
     \end{enumerate}
-
+    
     \vspace{8pt}
+    \noindent
+    Una volta fatto ciò, la situazione iniziale nel terminale dovrebbe essere quella mostrata in figura \ref{fig:ch1_fig1}, ed eseguendo il comando \texttt{pwd} sarà possibile vedere il proprio posizionamento all'interno del sottosistema WSL.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\textwidth]{chapter1_figures/img1.png}
+        \vspace{-5pt}
+        \caption{Schermata iniziale del sottosistema WSL}
+        \label{fig:ch1_fig1}
+    \end{figure}
+
     \item \textbf{\textit{Passo 2}: installazione delle dipendenze}\\
     Nel terminale di Ubuntu appena aperto incollare questi comandi uno alla volta:
     \begin{lstlisting}[style=mystyle, language=C, , escapeinside={(*@}{@*)}]
@@ -47,62 +57,169 @@ sudo apt update && sudo apt upgrade -y
     \end{lstlisting}
     \begin{lstlisting}[style=mystyle, language=C, , escapeinside={(*@}{@*)}]
 //Installa compilatori, Python e librerie necessarie a Gem5
-sudo apt install build-essential git m4 scons zlib1g zlib1g-dev libprotobuf-dev protobuf-compiler libprotoc-dev libgoogle-perftools-dev python3-dev python-is-python3 libboost-all-dev pkg-config -y
+sudo apt install build-essential git m4 scons zlib1g zlib1g-dev libprotobuf-dev protobuf-compiler libprotoc-dev libgoogle-perftools-dev python3-dev python-is-python3 libboost-all-dev pkg-config libpng-dev libhdf5-dev libcapstone-dev -y
     \end{lstlisting}
-    \textbf{\textit{Note}}: facendo copia-incolla dei comandi potrebbero verificarsi dei problemi dovuti ai "-" letti dal terminale di ubuntu come caratteri speciali, in quel caso riscriverli a mano.
+    \textbf{\textit{Note}}: facendo copia-incolla dei comandi potrebbero verificarsi dei problemi dovuti ai \textit{"-"} letti dal terminale di Ubuntu come caratteri speciali, in tal caso è consigliato riscriverli a mano.
 
     \vspace{8pt}
-    \item \textbf{\textit{Passo 3}: scaricare e compilare Gem5}
+    \item \textbf{\textit{Passo 3}: scaricare e compilare Gem5}\\
+    Prima di \textbf{scaricare} Gem5 è consigliato creare una cartella adatta a poterlo contenere.\\
+    Quest'operazione viene svolta principalmente perché in futuro dovremo scaricare anche il simulatore architetturale \textbf{MarssX86}: così facendo avremo entrambi i simulatori in una cartella apposita.\\
+    Senza spostarsi dalla posizione iniziale \texttt{/home/utente} si va a creare la cartella:
+    \begin{lstlisting}[style=mystyle, language=C, , escapeinside={(*@}{@*)}]
+mkdir dev_local // Crea la cartella dev_local
+cd dev_local // Ci si sposta dentro dev_local per scaricare gem5
+    \end{lstlisting}
+    Una volta posizionati in \texttt{/home/utente/dev\_local} è possibile utilizzare il comando \texttt{git clone} per scaricare il simulatore gem5 dal repository ufficiale 
     \begin{lstlisting}[style=mystyle, language=C, , escapeinside={(*@}{@*)}]
 //Clonare il repository del progetto nel proprio workspace
 git clone (*@\url{https://github.com/gem5/gem5.git}@*) 
     \end{lstlisting}
-    \begin{lstlisting}[style=mystyle, language=C, , escapeinside={(*@}{@*)}]
-//Entrare nella cartella "gem5"
-cd workspace/gem5
-    \end{lstlisting}
-    \begin{lstlisting}[style=mystyle, language=C, , escapeinside={(*@}{@*)}]
-//Avviare la compilazione (ci vorranno dai 10 ai 40 minuti)
-//Questo comando usa tutti i core della tua CPU per fare prima
-scons build/ARM/gem5.opt -j $(nproc)
-    \end{lstlisting}
-    \textbf{\textit{Note}}: se si vuole simulare RISC-V, bisogna sostituire \texttt{ARM} con \texttt{RISCV} nel comando \texttt{scons}.
-\end{itemize}
+    Quando la clonazione sarà completata, all'interno di \texttt{dev\_local} sarà presente un'altra cartella nominata "gem5" al cui interno saranno presenti tutti i file necessari per la compilazione del simulatore.
 
-\subsubsection{Installazione e setup di Gem5 su macOS}
-Su macOS, come detto al capitolo \ref{ch1:par:paragrafo_1_1}, è possibile compilare nativamente usando il terminale, ma è necessario un gestore di pacchetti chiamato \textbf{Homebrew}.\\
-Anche in questo caso possiamo suddividere l'installazione in diversi passaggi:
-\begin{itemize}[leftmargin=1em]
-    \item \textbf{\textit{Passo 1}: preparazione dell'ambiente}
+    \vspace{8pt}
+    \noindent
+    Prima di far partire la compilazione è necessario fare alcune \textbf{premesse importanti}.\\
+    Utilizzare un calcolatore con $16$GB o meno di memoria RAM non basterà: Gem5 è enorme e usa template C++ complessi, ogni core che compila può occupare anche 2-3 GB di RAM.
+    Inoltre, considerando che Windows utilizza parte di questa RAM, la situazione si complica ulteriormente.\\
+    Una possibile soluzione a questo problema, nel caso in cui non si disponesse di un calcolatore con la quantità di RAM necessaria, è quella di "truccare" WSL per dargli più memoria usando il disco fisso come se fosse RAM (operazione di Swap della memoria):
     \begin{enumerate}[leftmargin=1.3em]
-        \item Aprire il terminale;
-        \item Se non si hanno, installare gli strumenti di sviluppo:  \cmd{\texttt{xcode-select ---install}};
-        \item Installare Homebrew seguento le istruzioni su \url{https://brew.sh/}.
+        \item Aprire il blocco note di windows;
+        \item Incollare esattamente queste righe:
+        \begin{lstlisting}[style=mystyle, language=C, , escapeinside={(*@}{@*)}]
+[wsl2]
+memory=10GB
+swap=16GB
+        \end{lstlisting}
+        In questo modo stiamo dando a WSL massimo $10$GB di RAM vera, ma aggiungiamo $16$GB di "memoria lenta" su disco per evitare che la compilazione vada in crash.
+        \item Salvare il file con nome \texttt{.wslconfig} (assicurandosi che non ci sia .txt alla fine!) nella propria cartella utente principale: \texttt{C:\textbackslash Utenti\textbackslash NomeUtente\textbackslash .wslconfig}
+        \item Aprire la PowerShell (sempre in modalità amministratore) e spegnere WSL per applicare la modifica con il comando \cmd{\texttt{wsl ---shutdown}}
     \end{enumerate}
 
     \vspace{8pt}
-    \item \textbf{\textit{Passo 2}: installare le dipendenze}
+    \noindent
+    Una volta fatte queste modifiche, è finalmente possibile {far partire la compilazione}: riaprendo il terminale Ubuntu e posizionandosi in \texttt{/home/NomeUtente/dev\_local/gem5} deve essere scritto il seguente comando:
     \begin{lstlisting}[style=mystyle, language=C, , escapeinside={(*@}{@*)}]
-brew install git scons python protobuf boost libpng hdf5 pkg-config
+scons build/ARM/gem5.opt -j 1
     \end{lstlisting}
+    Tramite di esso la compilazione viene fatta partire utilizzando un solo core della cpu. Nonostante l'utilizzo dello "Swap" con la memoria del disco, la compilazione può essere talmente pesante che utilizzando più di un core per la compilazione si rischierebbe di saturare la RAM mandando in crash la compilazione.
+    È \textbf{assolutamente "normale"} che i tempi di compilazione varino da 1h a 2h in base alla cpu che si ha a disposizione.
 
     \vspace{8pt}
-    \item \textbf{\textit{Passo 3}: scaricare e compilare Gem5}
+    \noindent
+    \textbf{\textit{Note}}: non appena la compilazione del simulatore ARM termina, per incominciare la compilazione del simulatore RISC-V basterà reinviare il comando \texttt{scons} quì sopra, sostituendo \texttt{ARM} con \texttt{RISCV}.
+
+    \vspace{8pt}
+    \noindent
+    \item \textbf{\textit{Passo 4}: test di funzionamento}\\
+    Per testare che il simulatore sia stato installato correttamente è possibile lanciare un comando di prova già incluso al suo interno.\\
+    Sempre posizionati in \texttt{/home/NomeUtente/dev\_local/gem5}, lanciare questo comando:
     \begin{lstlisting}[style=mystyle, language=C, , escapeinside={(*@}{@*)}]
-//Clonare il repository del progetto nel proprio workspace
-git clone (*@\url{https://github.com/gem5/gem5.git}@*) 
+./build/ARM/gem5.opt configs/deprecated/example/se.py --cmd=tests/test-progs/hello/bin/arm/linux/hello    
     \end{lstlisting}
-    \begin{lstlisting}[style=mystyle, language=C, , escapeinside={(*@}{@*)}]
-//Entrare nella cartella "gem5"
-cd workspace/gem5
-    \end{lstlisting}
-    \begin{lstlisting}[style=mystyle, language=C, , escapeinside={(*@}{@*)}]
-//Avviare la compilazione
-//Questo comando usa tutti i core della tua CPU per fare prima
-scons build/ARM/gem5.opt -j $(nproc)
-    \end{lstlisting}
-    \textbf{\textit{Note}}: anche in questo caso, per simulare RISC-V, bisogna sostituire \texttt{ARM} con \texttt{RISCV} nel comando \texttt{scons}.
+    \begin{figure}[H]
+        \centering
+        \vspace{-10pt}
+        \includegraphics[width=\textwidth]{chapter1_figures/img2.png}
+        \vspace{-20pt}
+        \caption{test di simulazione per Gem5}
+        \label{fig:ch1_fig2}
+    \end{figure}
+    L'esecuzione di questo comando comporterà la creazione, all'interno della cartella "m5out" situata all'interno della cartella "gem5", di \textbf{due file fondamentali}:
+    \begin{itemize}[leftmargin=1em, label=\raisebox{0.4ex}{\phantom{1}\rule{0.6ex}{0.6ex}}]
+        \item \textbf{\textit{"stats.txt"}}: Contiene tutte le statistiche (cicli, cache miss, istruzioni eseguite, ecc.). È il file di testo enorme che si dovrà analizzare dopo l'esecuzione vera e propria del workload;
+        \item \textbf{\textit{"config.ini"}}: Contiene la descrizione dettagliata dell'hardware appena simulato (utile per verificare se è stata davvero usata la CPU che si voleva).
+    \end{itemize}
 \end{itemize}
+
+\subsubsection{Installazione e setup di Gem5 su macOS}
+Sebbene sia teoricamente possibile compilare nativamente su macOS, la gestione delle dipendenze (in particolare Python e Protobuf) risulta spesso instabile a causa degli aggiornamenti di sistema Apple.
+
+\vspace{8pt}
+\noindent
+Per garantire la \textbf{massima riproducibilità} e stabilità, la soluzione raccomandata per macOS è l'utilizzo di un container \textbf{Docker} basato su Ubuntu $22.04$. Come per WSL, questo approccio permette di avere un ambiente di sviluppo basato su Linux nativo.
+
+\begin{itemize}[leftmargin=1em]
+    \item \textbf{\textit{Passo 1}: preparazione del container}
+    \begin{enumerate}[leftmargin=1.3em]
+        \item Scaricare e installare Docker desktop dal sito ufficiale \url{https://www.docker.com/};
+        \item È consigliato aprire il terminale posizionandosi nella cartella del proprio apple account come mostrato in figura \ref{fig:ch1_fig3}; 
+        \begin{figure}[H]
+            \centering
+            \vspace{-10pt}
+            \includegraphics[width=0.8\textwidth]{chapter1_figures/img3.png}
+            \vspace{-5pt}
+            \caption{posizionamento iniziale per l'installazione di docker}
+            \label{fig:ch1_fig3}
+        \end{figure}
+        \vspace{-12pt}
+        \item Creare il proprio workspace che conterrà il simulatore Gem5 e in futuro MarssX86.
+        \begin{lstlisting}[style=mystyle, language=C, escapeinside={(*@}{@*)}]
+mkdir dev_local
+cd dev_local
+        \end{lstlisting}
+    \end{enumerate}
+
+    \vspace{8pt}
+    \noindent
+    \item \textbf{\textit{Passo 2}: installazione delle dipendenze}
+    \begin{enumerate}[leftmargin=1.3em]
+        \item All'interno di \texttt{/Users/NomeUtente/dev\_local}, installare tutte le dipendenze necessarie per la creazione del container di Ubuntu $22.04$:
+        \begin{lstlisting}[style=mystyle, language=C, escapeinside={(*@}{@*)}]
+docker pull ghcr.io/gem5/ubuntu-24.04_all-dependencies:v25-1
+        \end{lstlisting}
+        \item Una volta che il workspace è stato creato è possibile far partire il container di Ubuntu (sempre stando posizionati in \texttt{/Users/NomeUtente/dev\_local}):
+        \begin{lstlisting}[style=mystyle, language=C, escapeinside={(*@}{@*)}]
+docker run --volume /Users/NomeUtente/dev_local/gem5:/gem5 --rm -it ghcr.io/gem5/ubuntu-24.04_all-dependencies:v24-0        
+        \end{lstlisting}
+        Il completamento di questo comando dovrebbe aprire una riga di comando di questo tipo, ad indicare che siamo all'interno del container Ubuntu.
+        \begin{lstlisting}[style=mystyle, language=C, escapeinside={(*@}{@*)}]
+root@1ab1ef08f2f:/#    
+        \end{lstlisting}
+    \end{enumerate}
+
+    \vspace{8pt}
+    \item \textbf{\textit{Passo 3}: scaricare e compilare Gem5}\\
+    All'interno del container Ubuntu appena creato, è possibile \textbf{scaricare} il repository ufficiale tramite il comando \texttt{git clone}:
+    \begin{lstlisting}[style=mystyle, language=C++, escapeinside={(*@}{@*)}]
+root@1ab1ef08f2f:/#  git clone (*@\url{https://github.com/gem5/gem5.git}@*) 
+    \end{lstlisting}
+    Verrà creata una cartella "gem5" al cui interno saranno al cui interno saranno presenti tutti i file necessari per la compilazione del simulatore.
+
+    \vspace{8pt}
+    Come specificato al \textbf{\textit{"Passo 3"}} del capitolo \ref{par:ch_1.2.1} la compilazione richiede una grande quantità di RAM per cui è richiesto un calcolatore con $16$ o più GB di memoria RAM (solo per la compilazione di Gem5!). Dopo alcuni test da noi effettuati è risultato che la compilazione su un calcolatore con $8$GB di RAM potrebbe impiegare anche mezza giornata!\\
+    Proprio per questo motivo, anche disponendo di $16$GB di memoria RAM è necessario andare nella GUI di Docker \texttt{impostazioni} $\rightarrow$ \texttt{resources} $\rightarrow$ \texttt{advanced}, e da quì cambiare le seguenti impostazioni:
+    \begin{itemize}[leftmargin=1em, label=\raisebox{0.4ex}{\phantom{1}\rule{0.6ex}{0.6ex}}]
+        \item \textbf{\textit{Memory limit}}: impostiamo la capacità massima di memoria RAM che Docker può utilizzare. È consigliato impostarlo quasi al massimo, (ad esempio, con $16$ GB di RAM a disposizione impostarlo a $14/15$) per permettere al sistema operativo (macOS) di "sopravvivere"
+        \item \textbf{\textit{Swap}}: Invece, tramite questa impostazione, indichiamo quanto spazio di "memoria lenta" prendere dal disco nel caso in cui la RAM vada in saturazione a causa della pesantezza di compilazione.
+    \end{itemize}
+
+    \vspace{8pt}
+    Una volta che il repository è stato clonato ci si sposta all'interno della cartella "gem5" per far partire la \textbf{compilazione del simulatore}, utilizzando $1$ o al massimo $2$ core per evitare che la compilazione vada in crash a causa della saturazione della RAM a dispozione.
+    \begin{lstlisting}[style=mystyle, language=C, escapeinside={(*@}{@*)}]
+// Mi sposto all'interno della cartella gem5
+root@1ab1ef08f2f:/#  cd gem5 
+
+// Compilazione ARM
+root@1ab1ef08f2f:/gem5# scons build/ARM/gem5.opt -j1 
+    \end{lstlisting}
+    Come per Windows, anche la compilazione su macOS può impiegare da $1$h a $2$h, ed è \textbf{"normale"} vista la mole di file da scaricare.\\
+    \textbf{\textit{Note}}: non appena la compilazione del simulatore ARM termina, per incominciare la compilazione del simulatore RISC-V basterà reinviare il comando \texttt{scons} quì sopra, sostituendo \texttt{ARM} con \texttt{RISCV}.
+
+    \vspace{8pt}
+    \textbf{\textit{Passo 4}: test di funzionamento}\\
+    Per testare che il simulatore sia stato installato correttamente è possibile lanciare un comando di prova già incluso al suo interno.\\
+    Sempre posizionati in \texttt{root@1ab1ef08f2f:/gem5\#}, lanciare questo comando:
+    \begin{lstlisting}[style=mystyle, language=C, , escapeinside={(*@}{@*)}]
+./build/ARM/gem5.opt configs/deprecated/example/se.py --cmd=tests/test-progs/hello/bin/arm/linux/hello    
+    \end{lstlisting}
+    L'esecuzione di questo comando comporterà la creazione, all'interno della cartella "m5out" situata all'interno della cartella "gem5", di \textbf{due file fondamentali}:
+    \begin{itemize}[leftmargin=1em, label=\raisebox{0.4ex}{\phantom{1}\rule{0.6ex}{0.6ex}}]
+        \item \textbf{\textit{"stats.txt"}}: Contiene tutte le statistiche (cicli, cache miss, istruzioni eseguite, ecc.). È il file di testo enorme che si dovrà analizzare dopo l'esecuzione vera e propria del workload;
+        \item \textbf{\textit{"config.ini"}}: Contiene la descrizione dettagliata dell'hardware appena simulato (utile per verificare se è stata davvero usata la CPU che si voleva).
+    \end{itemize}
+\end{itemize}
+
 
 \subsection{Installazione e setup del simulatore MarssX86}
 Come detto precedentemente al capitolo \ref{ch1:par:paragrafo_1_1}, MarssX$86$ è troppo vecchio per funzionare su WSL moderlo o su macOS. Esistono due strade che risolvono il problema, le quali funzionano sia per Windows che per macOS:
