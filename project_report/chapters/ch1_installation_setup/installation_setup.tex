@@ -133,6 +133,7 @@ scons build/ARM/gem5.opt -j 1
 \end{itemize}
 
 \subsubsection{Installazione e setup di Gem5 su macOS}
+\label{par:ch_1.2.2}
 Sebbene sia teoricamente possibile compilare nativamente su macOS, la gestione delle dipendenze (in particolare Python e Protobuf) risulta spesso instabile a causa degli aggiornamenti di sistema Apple.
 
 \vspace{8pt}
@@ -224,6 +225,7 @@ root@1ab1ef08f2f:/gem5# scons build/ARM/gem5.opt -j1
 \subsection{Installazione e setup del simulatore MarssX86}
 Nonostante sia un processo abbastanza lungo e tedioso la scelta consigliata per effettuare l'installazione del simulatore, sia per Windows che per macOS, è utilizzare Docker.
 \subsubsection{Installazione e setup di MarssX86 su Windows}
+\label{par:ch_1.3.1}
 L'utilizzo di Docker è la scelta raccomandata per mantenere un flusso di lavoro unificato. Grazie all'integrazione con WSL 2, è possibile avviare l'ambiente "legacy" necessario per MarssX86 direttamente dallo stesso terminale utilizzato per Gem5 (come visto al passo $1$ del capitolo \ref{par:ch_1.2.1}), senza dover configurare macchine virtuali esterne pesanti.
 \begin{itemize}[leftmargin=1em]
     \item \textbf{\textit{Passo 1}: Configurazione (WSL + Docker)}
@@ -275,7 +277,7 @@ CMD ["/bin/bash"]
         \begin{lstlisting}[style=mystyle, language=C, escapeinside={(*@}{@*)}]
 sudo docker build --no-cache -t marss_env .
         \end{lstlisting}
-        \item Infine, è possibile creare l'ambiente ubuntu scelto. Servirà la password.
+        \item Infine, è possibile creare l'ambiente Ubuntu scelto. Servirà la password.
         \begin{lstlisting}[style=mystyle, language=C, escapeinside={(*@}{@*)}]
 sudo docker run -it --name marss_container -v "$PWD":/root/marss marss_env
         \end{lstlisting}
@@ -347,7 +349,7 @@ env.Append(CCFLAGS = ' -std=gnu++11 ')
 env.Append(CCFLAGS = ' -std=gnu++11 -U_FORTIFY_SOURCE ')
         \end{lstlisting}  
         In questo modo stiamo dicendo al compilatore di \textit{"disabilitare i controlli di sicurezza moderni per il codice vecchio del repository"}.\\
-        Premere \texttt{ctrl+o} per salvare le modifiche e \texttt{ctrl+x} per uscire dall'editor di testo.
+        Premere \texttt{ctrl+o} per salvare le modifiche, invio, e \texttt{ctrl+x} per uscire dall'editor di testo.
 
         \item Tornati nell'ambiente di simulazione bisogna effettuare lo stesso procedimento nel file \textit{"SConstruct"} principale, quindi non quello presente in \texttt{/root/marss/marss/ptlsim} ma in \texttt{/root/marss/marss/}, quindi:
         \begin{lstlisting}[style=mystyle, language=C, escapeinside={(*@}{@*)}]
@@ -399,6 +401,72 @@ root@{...}:~/marss/marss# scons -Q C=1 debug=0
     \end{figure}
 \end{itemize}
 
+\subsubsection{Installazione e setup di MarssX86 su macOS}
+Dal momento che, per simulare MarssX86 su Windows si sta utilizzando Docker, gran parte dei passaggi da effettuare su macOS rimangono identici.
 
+\vspace{8pt}
+\noindent
+Tuttavia, per impostazione predefinita, Docker su un dispositivo che monta un processore apple silicon crea un contenitore ARM64 (aarch64). MarssX86 è un simulatore più vecchio progettato esclusivamente per architetture x86\_64 (Intel/AMD), dunque ne consegue che se si andasse ad effettuare il seguente script di build (SConstruct):
+\begin{lstlisting}[style=mystyle, escapeinside={(*@}{@*)}]
+root@{...}:~/marss/marss# scons -Q C=1 debug=0
+\end{lstlisting} 
+verrebbe rilevato che la CPU è basata su ARM e il processo verrebbe interrotto non sapendo come effettuare la compilarlazione.
 
+\vspace{8pt}
+\noindent
+A questo punto, facendo riferimento al capitolo \ref{par:ch_1.3.1} è necessario eliminare il \textbf{\textit{"passo 1"}} poiché WSL non viene utilizzato, revisionare il \textbf{\textit{"passo 2"}}, modificando semplicemente i comandi di build e creazione dell'ambiente Ubuntu, e mantenere il \textbf{\textit{"passo 3"}} invariato.
+\begin{enumerate}[leftmargin=1.3em]
+    \item Come spiegato al \textbf{\textit{"passo 1"}} del capitolo \ref{par:ch_1.2.2} scaricare Docker dal link fornito. 
+    Inoltre, è consigliato creare una cartella \textit{"marss"} all'interno di \textit{"dev\_local"}, per mantenere separati i flussi di lavoro tra i due simulatori.\\
+    Per fare ciò è necessario essere posizionati in \texttt{/Users/NomeUtente/dev\_local/marss}
+    \begin{figure}[H]
+        \centering
+        \vspace{-10pt}
+        \includegraphics[width=0.9\textwidth]{chapter1_figures/img6.png}
+        \vspace{-10pt}
+        \label{fig:ch1_fig6}  
+    \end{figure}
+    \item All'interno della cartella \textit{"marss"}, come fatto per Windows, bisogna creare il "Dockerfile" all'interno del quale definire l'ambiente Ubuntu $18.04$, dunque:
+    \begin{lstlisting}[style=mystyle, escapeinside={(*@}{@*)}]
+nano Dockerfile
+    \end{lstlisting} 
+    e in seguito inserire le seguenti righe di codice:
+    \begin{lstlisting}[style=mystyle, language=bash, escapeinside={(*@}{@*)}]
+# Usiamo Ubuntu 18.04 che ha server ancora attivi e stabili
+FROM ubuntu:18.04
+
+# Aggiorniamo i repository (funzionera' senza errori 404)
+RUN apt-get update
+
+# Installiamo i tool di base e specificamente GCC 4.8 / G++ 4.8
+# MarssX86 richiede queste versioni antiche per compilare
+RUN apt-get install -y build-essential git scons zlib1g-dev python2.7 python-minimal g++ \
+    vim libsdl1.2-dev gcc-4.8 g++-4.8
+
+# Configuriamo il sistema per usare GCC 4.8 come default assoluto
+# Questo "inganna" Marss facendogli credere di essere su un vecchio sistema
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 100 && \
+    update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 100
+
+# Cartella di lavoro
+WORKDIR /root/marss
+
+CMD ["/bin/bash"]
+    \end{lstlisting}
+    \item Rimanendo sempre posizionati in \texttt{/Users/NomeUtente/dev\_local/marss} lanciare il comando di build per l'ambiente Ubuntu.
+    \begin{lstlisting}[style=mystyle, escapeinside={(*@}{@*)}]
+docker build --platform linux/amd64 --no-cache -t marss_env .
+    \end{lstlisting} 
+    Questo dice a Docker di fingere che sia una macchina Intel durante la costruzione.\\
+    \textbf{\textit{Note}}: questo passaggio richiederà più tempo rispetto a prima a causa dell'emulazione.
+    \item Subito dopo creare e far partire il container, specificando la piattaforma:
+    \begin{lstlisting}[style=mystyle, escapeinside={(*@}{@*)}]
+docker run --platform linux/amd64 -it --name marss_container -v "$PWD":/root/marss marss_env
+    \end{lstlisting} 
+    Una volta lanciato questo comando si dovrebbe essere riusciti ad entrare nel container e a terminale si dovrebbe visualizzare questo:
+    \begin{lstlisting}[style=mystyle, language=C, escapeinside={(*@}{@*)}]
+root@{...}:~/marss#
+    \end{lstlisting}
+    \item Dopo essere riusciti ad entrare all'interno del container, i seguenti passaggi sono tali e quali a quelli descritti al \textbf{\textit{"passo 3"}} del capitolo \ref{par:ch_1.3.1}.
+\end{enumerate}
 \end{document}

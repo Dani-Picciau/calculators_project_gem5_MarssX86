@@ -1,16 +1,17 @@
 # Fdb version 4
-["pdflatex"] 1768822983.5525 "/Users/d.picciaustudenti.uniss.it/Desktop/uniss/Calcolatori_Elettronici/calculators_project_Gem5_MarssX86/project_report/chapters/ch1_installation_setup/installation_setup.tex" "/Users/d.picciaustudenti.uniss.it/Desktop/uniss/Calcolatori_Elettronici/calculators_project_Gem5_MarssX86/project_report/chapters/ch1_installation_setup/installation_setup.pdf" "installation_setup" 1768822984.72779 0
+["pdflatex"] 1768844958.04501 "/Users/d.picciaustudenti.uniss.it/Desktop/uniss/Calcolatori_Elettronici/calculators_project_Gem5_MarssX86/project_report/chapters/ch1_installation_setup/installation_setup.tex" "/Users/d.picciaustudenti.uniss.it/Desktop/uniss/Calcolatori_Elettronici/calculators_project_Gem5_MarssX86/project_report/chapters/ch1_installation_setup/installation_setup.pdf" "installation_setup" 1768844959.40759 0
   "../figures/chapter1_figures/img1.png" 1768427301.68576 12413 44d971560e500fde527b73f2b7c6fa4e ""
   "../figures/chapter1_figures/img2.png" 1768434538.54082 181655 5c14c4dc39d23b127569998d511dc1d0 ""
   "../figures/chapter1_figures/img3.png" 1768470539.67953 100394 3626d24524b0d923909dc3698f7e21b7 ""
   "../figures/chapter1_figures/img4.png" 1768815137.92878 26566 18cd48f35970347f19de40db8a22a20a ""
   "../figures/chapter1_figures/img5.png" 1768822827.28956 57003 1c9c77288fd7e139d88624a0245c4e06 ""
+  "../figures/chapter1_figures/img6.png" 1768840074.34145 177677 8906d2ea2fcd942ab794230715fc664f ""
   "../packages/packages.tex" 1768067201.16028 3191 d97ac73d94f859da77b8d41ed3fa409c ""
   "/Users/d.picciaustudenti.uniss.it/Desktop/uniss/Calcolatori_Elettronici/calculators_project_Gem5_MarssX86/project_report/chapters/ch1_installation_setup/../../main_document/main.aux" 1768235463.67419 1607 3bb3d6b3aba41f0970127a4397d7b560 ""
   "/Users/d.picciaustudenti.uniss.it/Desktop/uniss/Calcolatori_Elettronici/calculators_project_Gem5_MarssX86/project_report/chapters/ch1_installation_setup/../../main_document/main.tex" 1767715634.54681 241 f0895894cab58b9d0058a360996d3305 ""
-  "/Users/d.picciaustudenti.uniss.it/Desktop/uniss/Calcolatori_Elettronici/calculators_project_Gem5_MarssX86/project_report/chapters/ch1_installation_setup/installation_setup.aux" 1768822984.63547 2672 b6448b89a279ef901bb4cc9f91efdbde "pdflatex"
-  "/Users/d.picciaustudenti.uniss.it/Desktop/uniss/Calcolatori_Elettronici/calculators_project_Gem5_MarssX86/project_report/chapters/ch1_installation_setup/installation_setup.out" 1768822984.63609 2113 cde6b62641ed6a1e2bb196afe87cb79b "pdflatex"
-  "/Users/d.picciaustudenti.uniss.it/Desktop/uniss/Calcolatori_Elettronici/calculators_project_Gem5_MarssX86/project_report/chapters/ch1_installation_setup/installation_setup.tex" 1768822983.31792 28444 16f79e299c9d0fd35e7b653c5d5795cd ""
+  "/Users/d.picciaustudenti.uniss.it/Desktop/uniss/Calcolatori_Elettronici/calculators_project_Gem5_MarssX86/project_report/chapters/ch1_installation_setup/installation_setup.aux" 1768844959.31158 3181 5be74315677d04595cca6649f3be0eba "pdflatex"
+  "/Users/d.picciaustudenti.uniss.it/Desktop/uniss/Calcolatori_Elettronici/calculators_project_Gem5_MarssX86/project_report/chapters/ch1_installation_setup/installation_setup.out" 1768844959.31227 2408 f8abddce605cc719ed81a7dc481369aa "pdflatex"
+  "/Users/d.picciaustudenti.uniss.it/Desktop/uniss/Calcolatori_Elettronici/calculators_project_Gem5_MarssX86/project_report/chapters/ch1_installation_setup/installation_setup.tex" 1768844957.85738 32698 0c002cf69c224af51292ad73f451fa7c ""
   "/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc" 1254269338 2375 baa924870cfb487815765f9094cf3728 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc" 1202520719 2405 5dcf2c1b967ee25cc46c58cd52244aed ""
