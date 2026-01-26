@@ -199,10 +199,10 @@ root@{...}:/#  git clone (*@\url{https://github.com/gem5/gem5.git}@*)
     Una volta che il repository è stato clonato ci si sposta all'interno della cartella "gem5" per far partire la \textbf{compilazione del simulatore}, utilizzando $1$ o al massimo $2$ core per evitare che la compilazione vada in crash a causa della saturazione della RAM a dispozione.
     \begin{lstlisting}[style=mystyle, language=C, escapeinside={(*@}{@*)}]
 // Mi sposto all'interno della cartella gem5
-root@1ab1ef08f2f:/# cd gem5 
+root@{...}:/# cd gem5 
 
 // Compilazione ARM
-root@1ab1ef08f2f:/gem5# scons build/ARM/gem5.opt -j1 
+root@{...}:/gem5# scons build/ARM/gem5.opt -j1 
     \end{lstlisting}
     Come per Windows, anche la compilazione su macOS può impiegare da $1$h a $2$h, ed è \textbf{"normale"} vista la mole di file da scaricare.\\
     \textbf{\textit{Note}}: non appena la compilazione del simulatore ARM termina, per incominciare la compilazione del simulatore RISC-V basterà reinviare il comando \texttt{scons} quì sopra, sostituendo \texttt{ARM} con \texttt{RISCV}.
@@ -355,7 +355,7 @@ env.Append(CCFLAGS = ' -std=gnu++11 -U_FORTIFY_SOURCE ')
         \begin{lstlisting}[style=mystyle, language=C, escapeinside={(*@}{@*)}]
 root@{...}:~/marss/marss# nano SConstruct
         \end{lstlisting}     
-        Una volta all'interno dell'editor di testo, bisogna scendere nel file fino a trovare un comando di questo tipo:
+        Una volta all'interno dell'editor di testo, bisogna scendere nel file fino a trovare una instruzione condizionale di questo tipo:
         \begin{lstlisting}[style=mystyle, escapeinside={(*@}{@*)}]
 if int(pretty_printing) :
     base_env = Environment(
@@ -399,7 +399,79 @@ root@{...}:~/marss/marss# scons -Q C=1 debug=0
         \vspace{-5pt}
         \label{fig:ch1_fig5} 
     \end{figure}
-\end{itemize}
+    Al termine della compilazione è possibile verificare la presenza dell'eseguibile tramite il seguente comando:
+    \begin{lstlisting}[style=mystyle]
+root@{...}:~/marss/marss# ./qemu/qemu-system-x86_64 --version
+    \end{lstlisting}
+Se in risposta si riceve un qualcosa del tipo:
+    \begin{lstlisting}[style=mystyle]
+QEMU emulator version 0.14.1, Copyright (c) 2003-2008 Fabrice Bellard
+    \end{lstlisting}
+    allora il simulatore è pronto all'uso.
+
+    \vspace{8pt}
+    \noindent
+    \item \textbf{\textit{Passo 4}: installazione immagine disco rigido}\\
+    Dopo aver completato la fase di installazione del simulatore con l'ambiente Ubuntu, si passa alla fase di installazione del sistema operativo vero e proprio.\\
+    A differenza di Gem5 che carica direttamente l'eseguibile, MarssX86 è un simulatore Full System (FS): simula un PC intero (BIOS, scheda madre, disco rigido). Quindi, per farlo funzionare, ci serve un'immagine del disco rigido con dentro un Sistema Operativo (Ubuntu vecchio).
+    \begin{enumerate}[leftmargin=1.3em]
+        \item Si rende necessario quindi, preparare la cartella dei dischi. Posizionati in \texttt{root/marss/} per creare una cartella \textit{"disks"}:
+        \begin{lstlisting}[style=mystyle]
+mkdir disks
+cd disks
+        \end{lstlisting}  
+        \item  Una volta creata la cartella, spostarsi in \texttt{root/marss/marss/disks} e installare il comando \textit{"wget"} per poter poi installare il sistema operativo da emulare tramite l'ambiente Ubuntu preparato precentemente.
+        \begin{lstlisting}[style=mystyle]
+root@{...}:~/marss/marss/disks# apt-get install -y wget bzip2
+        \end{lstlisting} 
+        Installerà tutte le librerie necessarie al suo funzionamento, ci sarà da aspettare qualche secondo.
+        \item  A questo punto è tutto pronto per installare il sistema operativo.\\
+        Il sistema operativo scelto è ottenibile al seguente link \url{https://people.debian.org/~aurel32/qemu/amd64/debian_squeeze_amd64_standard.qcow2}.\\
+        Si tratta di \textit{Debian Squeeze}, una distribuzione di Linux rilasciata nel febbraio del 2011.\\
+        La scelta di questa distribuzione specifica è dettata da vincoli di compatibilità: 
+        \begin{itemize}[leftmargin=1em, label=\raisebox{0.4ex}{\phantom{1}\rule{0.6ex}{0.6ex}}]
+            \item \textbf{Sincronizzazione Temporale}: MarssX86 è stato sviluppato intorno al 2011-2012, basandosi su una versione di QEMU (0.14) di quel periodo. I simulatori Full System simulano l'hardware di quell'epoca, e Debian Squeeze, essendo del 2011, "parla la stessa lingua" del simulatore.
+            \item \textbf{Leggerezza (no graphic)}: l'immagine scaricata è una versione "Standard/Server", priva di interfaccia grafica (niente finestre, niente mouse), e questo è cruciale poiché riduce il consumo di RAM e CPU simulata
+        \end{itemize}
+        Dunque, per installare la distribuzione scelta si utilizza il seguente comando:
+        \begin{lstlisting}[style=mystyle]
+root@{...}:~/marss/marss/disks# wget https://people.debian.org/~aurel32/qemu/amd64/debian_squeeze_amd64_standard.qcow2
+        \end{lstlisting} 
+        \item Nonostante l'immagine del disco sia idonea per MarssX86, è necessaria una versione precedente. L'immagine scaricata è in formato QCOW2 versione 3 (introdotto da QEMU 1.1 nel 2012), ma MarssX86 usa QEMU 0.14 (2011), che conosce solo la versione 2.\\
+        Per risolvere questo problema legato alla versione, è necessario  effettuare un "downgrade" dell'header del file del disco virtuale per renderlo leggibile dal vecchio simulatore:
+        \begin{lstlisting}[style=mystyle]
+root@{...}:~/marss/marss/disks# apt-get update && apt-get install -y qemu-utils
+        \end{lstlisting}   
+        \begin{lstlisting}[style=mystyle]
+root@{...}:~/marss/marss/disks# qemu-img convert -f qcow2 -O qcow2 -o compat=0.10 debian_squeeze_amd64_standard.qcow2 debian_old.qcow2
+        \end{lstlisting}   
+        \cmd{\texttt{compat=0.10}} forza il formato a essere leggibile dai simulatori del 2011, creando una nuova immagine del disco \textit{debian\_old.qcow2}.
+        \item Ora, per far partire a distribuzione Debian, basterà lanciare il seguente comando, posizionati in \texttt{/root/marss/marss}:
+        \begin{lstlisting}[style=mystyle]
+root@{...}:~/marss/marss# ./qemu/qemu-system-x86_64 -m 1G -hda /root/marss/disks/debian_old.qcow2 -nographic
+        \end{lstlisting} 
+        Verrà richiesto login e password, le credenziali saranno \textit{"root"} per entrambi i campi.
+        \begin{figure}[H]
+            \centering
+            \vspace{-5pt}
+            \includegraphics[width=0.7\textwidth]{chapter1_figures/img7.png}
+            \vspace{-5pt}
+            \label{fig:ch1_fig7} 
+        \end{figure}
+    \end{enumerate} 
+\end{itemize} 
+\noindent
+\textbf{\textit{Ruolo nell'architettura della simulazione}}\\
+La procedura si presenza abbastanza complessa, dunque, per chiarire il funzionamento complessivo, facciamo un recap:
+\begin{enumerate}[leftmargin=1.3em]
+\item \textbf{Host Fisico}: il PC Windows (server WSL) o il PC macOS.
+\item \textbf{Container Docker}: l'ambiente che contiene le librerie necessarie per compilare ed eseguire il simulatore.
+\item \textbf{Simulatore (MarssX86/QEMU)}: il programma che finge di essere un computer fisico (crea CPU, RAM e Disco finti).
+\item \textbf{Guest OS (Debian Squeeze)}: Il sistema operativo che "vive" dentro il disco finto e che esegue effettivamente il codice C.
+\end{enumerate}
+
+
+
 
 \subsubsection{Installazione e setup di MarssX86 su macOS}
 Dal momento che, per simulare MarssX86 su Windows si sta utilizzando Docker, gran parte dei passaggi da effettuare su macOS rimangono identici.
@@ -467,6 +539,6 @@ docker run --platform linux/amd64 -it --name marss_container -v "$PWD":/root/mar
     \begin{lstlisting}[style=mystyle, language=C, escapeinside={(*@}{@*)}]
 root@{...}:~/marss#
     \end{lstlisting}
-    \item Dopo essere riusciti ad entrare all'interno del container, i seguenti passaggi sono tali e quali a quelli descritti al \textbf{\textit{"passo 3"}} del capitolo \ref{par:ch_1.3.1}.
+    \item Dopo essere riusciti ad entrare all'interno del container, i seguenti passaggi sono tali e quali a quelli descritti dal \textbf{\textit{"passo 3"}} in poi del capitolo \ref{par:ch_1.3.1}.
 \end{enumerate}
 \end{document}

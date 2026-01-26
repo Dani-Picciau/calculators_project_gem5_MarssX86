@@ -3,4 +3,192 @@
 
 \begin{document}
 \section{Esecuzione di un workload tramite i simulatori}
+L'obiettivo di questo progetto è analizzare e confrontare le prestazioni di tre diverse architetture (ISA): ARM, RISC-V e x86, utilizzando un workload computazionale standardizzato.
+Per poter eseguire questo confronto fra le differenti architetture è imperativo stabilire una metodologia che ne  garantisca l'equità.
+
+\subsection{Definizione di "piccolo workload"}
+Le istruzioni del progetto richiedono l'esecuzione di un "piccolo workload" con tracing e statistiche. Per garantire la riproducibilità e la confrontabilità tra ARM, RISC-V e x86, il workload non deve dipendere da librerie di sistema complesse che potrebbero variare tra le architetture.
+
+\vspace{8pt}
+\noindent
+Il candidato ideale per questo workload è un algoritmo di moltiplicazione di matrici (Matrix Multiplication) denso. Questo kernel computazionale offre diversi vantaggi analitici:
+\begin{itemize}[leftmargin=1em]
+    \item \textbf{Prevedibilità}: l'accesso alla memoria è regolare, permettendo di analizzare l'efficacia delle gerarchie di cache.
+    \item \textbf{Intensità Computazionale}: stressa le unità funzionali della CPU e la logica di pipelining, evidenziando le differenze tra l'approccio RISC (molte istruzioni semplici) e CISC (istruzioni complesse con accessi in memoria impliciti).
+    \item \textbf{Portabilità}: può essere scritto in C standard (ANSI C) e compilato staticamente per tutte e tre le architetture senza modifiche al codice sorgente.
+\end{itemize}
+
+\vspace{8pt}
+\noindent
+Il codice sorgente C proposto per l'esperimento dovrà essere compilato in tre binari distinti utilizzando cross-compilatori specifici per ARM, RISC-V e x86, come dettagliato nelle sezioni successive, ed è il seguente:
+\begin{lstlisting}[style=mystyle, language=C, escapeinside={(*@}{@*)}]
+#include <stdio.h>
+#include <stdlib.h>
+
+#define N 64 // Dimensione ridotta per simulazione rapida
+
+void matrix_multiply(double *A, double *B, double *C, int size) {
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            double sum = 0.0;
+            for (int k = 0; k < size; k++) {
+                sum += A[i * size + k] * B[k * size + j];
+            }
+            C[i * size + j] = sum;
+        }
+    }
+}
+
+int main() {
+    size_t bytes = N * N * sizeof(double);
+    double *A = (double *)malloc(bytes);
+    double *B = (double *)malloc(bytes);
+    double *C = (double *)malloc(bytes);
+
+    // Inizializzazione deterministica
+    for (int i = 0; i < N * N; i++) {
+        A[i] = 1.0;
+        B[i] = 2.0;
+    }
+
+    printf("Inizio Benchmark Moltiplicazione Matrici %dx%d\n", N, N);
+    matrix_multiply(A, B, C, N);
+    printf("Fine Benchmark\n");
+
+    return 0;
+}                                           
+\end{lstlisting}
+
+\subsection{Problema metodologico}
+Una delle sfide principali di questo confronto risiede nella natura diversa degli ambienti di simulazione disponibili:
+\begin{itemize}[leftmargin=1em]
+    \item \textbf{Gem5} offre la modalità \textbf{Systemcall Emulation (SE)} la quale non simula un vero computer con un disco rigido e un sistema operativo completo. Permette di simulare l'esecuzione di binari user-space evitando di modellare i dispositivi o un OS, emulando la maggior parte dei servizi a livello di sistema;
+    \item \textbf{MarssX86} operà in modalità \textbf{Full System (FS)}, simulando un'intera macchina fisica, incluso il sistema operativo guest, i device e gli interrupt.
+\end{itemize}
+
+\subsubsection{Il caso Gem5 in modalità (SE)}
+Nella compilazione standard (dinamica), l'eseguibile generato è incompleto: esso contiene riferimenti a funzioni esterne (come printf o malloc presenti nella glibc) ma non il loro codice macchina. Al momento dell'avvio, prima ancora che venga eseguita la funzione main(), il sistema operativo invoca il Dynamic Linker, il quale deve:
+\begin{itemize}[leftmargin=1em]
+    \item Esplorare il filesystem alla ricerca delle librerie condivise (.so) richieste;
+    \item Caricarle nella memoria virtuale del processo;
+    \item Risolvere i simboli, collegando le chiamate del programma agli indirizzi di memoria delle librerie appena caricate;
+\end{itemize}
+
+\vspace{8pt}
+\noindent
+Proprio per questo motivo, questo \textbf{meccanismo risulta critico} in modalità SE, poiché:
+\begin{itemize}[leftmargin=1em]
+    \item \textbf{Assenza di Filesystem Virtuale Completo}: Gem5 in modalità SE non dispone di un filesystem guest nativo. Quando il Dynamic Linker (che è un programma a sé stante) cerca le librerie in percorsi standard (es. /lib/ o /usr/lib/), tali percorsi potrebbero non esistere nell'ambiente simulato o non coincidere con i percorsi delle librerie cross-compilate presenti sulla macchina host.
+    \item \textbf{Complessità delle Syscall}: Il Dynamic Linker fa un uso intensivo di chiamate di sistema per mappare file in memoria (open, mmap). Sebbene Gem5 emuli le syscall comuni (come read()), la gestione complessa del caricamento dinamico può portare a errori di path lookup o incompatibilità di ABI (Application Binary Interface) tra host e guest.
+\end{itemize}
+\noindent
+Per oviare a queste problematiche e garantire la riproducibilità degli esperimenti si rende dunque necessario imporre dei vincoli specifici sulla fase di compilazione e linking del workload che viene compilato staticamente utilizzando il flag \texttt{-static}.\\
+Con il linking statico, tutte le dipendenze necessarie (inclusa la libc) vengono incorporate fisicamente all'interno del file binario al momento della compilazione. Ciò rende l'eseguibile autosufficiente:
+\begin{itemize}[leftmargin=1em]
+    \item Elimina la necessità del Dynamic Linker in fase di avvio;
+    \item Rimuove la dipendenza da librerie esterne durante la simulazione;
+    \item Permette a Gem5 di caricare il binario in memoria ed eseguire direttamente il codice utente, intercettando ed emulando puntualmente le sole System Call esplicite generate dal programma (es. output su terminale), garantendo stabilità e portabilità tra diversi ambienti host.
+\end{itemize}
+
+\subsubsection{Il caso MarssX86 (FS)}
+Nonostante il simulatore MarssX86 sia adatto a far girare un vero sistema operativo, con disco virtuale, un kernel Linux vero e delle librerie installate dentro l'immagine del disco (quindi in modalità Full System), rimane un problema di \textbf{compatibilità delle versioni}, dovuto principalmente al fatto che si tratta di un simulatore datato.
+
+\vspace{8pt}
+\noindent
+L'ambiente docker che viene utilizzato fornisce Ubuntu $18.04$, uscito nel $2018$, e utilizza la libreria glibc versione $2.27$. Invece, le immagini del disco che si devono utilizzare per il corretto funzionament su MarssX86 sono solitamente basate su ubuntu $10.04$ o $12.04$ (relative agli anni $2010-2012$) e utilizzano una libreria glibc versione $2.15$ o inferiore.\\
+Purtroppo, come specificato al \textbf{\textit{"passo 2"}} del capitolo \ref{par:ch_1.3.1}, tali versioni dell'ambiente ubuntu sono state eliminate dai server.\\
+La libreria standard di C non garantisce una \textit{forward compatibility} (compatibilità in avanti):
+\begin{itemize}[leftmargin=1em]
+    \item Un programma compilato su un sistema vecchio gira su uno nuovo (Backward Compatibility);
+    \item Un programma compilato su un sistema nuovo (il Docker con 18.04) NON gira su uno vecchio (MarssX86).
+\end{itemize}
+
+\vspace{8pt}
+\noindent
+Poiché l'ambiente di compilazione (Host) dispone di librerie di sistema (libc) molto più recenti rispetto all'ambiente simulato (Guest OS nell'immagine disco), un linking dinamico causerebbe errori di runtime dovuti al version mismatch delle librerie condivise.\\
+Una possibile soluzione è utilizzare anche in questo caso il linking statico, che disaccoppia il benchmark dalle librerie del sistema guest.
+Pertanto, l'unico modo per riuscire a far partire il compilatore MarssX86 è utilizzare l'opzione \texttt{-static} rendendo il programma indipendente dalla "vecchiaia" del sistema operativo simulato dentro MarssX86.
+
+
+\subsection{Strategia adottata}
+Per garantire un confronto il più equo possibile nonostante queste differenze strutturali, è stata adottata la seguente metodologia:
+\begin{enumerate}[leftmargin=1em]
+    \item \textbf{Isolamento Microarchitetturale (Gem5)}: Per le architetture ARM e RISC-V su Gem5, abbiamo scelto la modalità \textbf{SE}. Questa scelta ci permette di misurare le prestazioni pure della CPU e della gerarchia di memoria (cache), eliminando il 'rumore' introdotto dai servizi del kernel e dallo scheduling dei processi;
+    \item \textbf{Realismo Operativo (MarssX86)}: Per l'architettura x86 su MarssX86, operiamo in un contesto FS. Siamo consapevoli che i risultati includeranno l'overhead del sistema operativo (context switch, gestione TLB software);
+    \item \textbf{Mitigazione tramite Workload e Compilazione}:
+    \begin{itemize}[leftmargin=1em, label=\raisebox{0.4ex}{\phantom{1}\rule{0.6ex}{0.6ex}}]
+        \item Abbiamo scelto un workload CPU-bound (moltiplicazione matrici) e non I/O-bound. Questo minimizza le chiamate di sistema, rendendo le prestazioni dipendenti quasi esclusivamente dalla potenza di calcolo della CPU e dall'efficienza delle cache, riducendo il divario tra modalità SE e FS;
+        \item Abbiamo utilizzato la compilazione statica (\texttt{-static}) per tutti i binari. Questo garantisce che su Gem5 (SE) il simulatore possa emulare le syscall senza dipendenze esterne, e su MarssX86 (FS) evita conflitti di librerie (ABI mismatch) tra la macchina host e il sistema guest simulato.
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Metodologia e Configurazione degli Esperimenti}
+Una volta stabilita la natura del workload e le modalità di simulazione, la fase sperimentale prevede l'esecuzione di una matrice di test strutturata per isolare l'impatto delle diverse configurazioni microarchitetturali.
+
+\subsubsection{Matrice dei test e definizione delle Baseline}
+Per ciascuna delle tre architetture analizzate (ARM, RISC-V e x86), verranno effettuate tre diverse build (configurazioni di simulazione), per un totale di 9 simulazioni distinte. L'obiettivo è osservare come il medesimo workload risponda alla variazione di parametri chiave (come la frequenza di clock, la dimensione delle cache o il modello di CPU).
+
+\vspace{8pt}
+\noindent
+Per rendere il confronto significativo, all'interno di ogni gruppo architettonico viene definita una \textbf{Baseline}:
+\begin{itemize}[leftmargin=1em]
+    \item \textbf{Configurazione Baseline}: Rappresenta il punto di riferimento con parametri standard (es. configurazione di default del simulatore).
+    \item \textbf{Configurazione 2 e 3}: Rappresentano varianti in cui viene modificato un parametro specifico (ad esempio, raddoppio della cache L2 o differente modello di CPU).
+\end{itemize}
+
+\subsection{Esecuzione del workload per ARM e RISC-V (Gem5)}
+Per poter eseguire il workload scelto sulle architetture target (ARM e RISC-V), è prima necessario affrontare il problema della compatibilità binaria. Poiché le macchine utilizzate per lo sviluppo (Host) dispongono solitamente di un set di istruzioni x86\_64 o ARM64 (Apple Silicon), i binari prodotti da un compilatore standard non sarebbero comprensibili dai simulatori configurati per architetture diverse.
+
+\vspace{8pt}
+\noindent
+In particolare, anche qualora si utilizzasse un processore Apple Silicon (già basato su ARM), sarebbe comunque necessaria la cross-compilazione (o più precisamente una compilazione specifica per il Guest) principalmente per due motivi: 
+\begin{itemize}[leftmargin=1em] 
+    \item \textbf{ABI (Application Binary Interface)}: il binario "nativo" di un Mac è progettato per macOS (formato Mach-O), mentre Gem5 richiede un binario in formato Linux ELF; 
+    \item \textbf{Librerie e System Call}: macOS utilizza librerie di sistema Apple, mentre il simulatore Gem5 emula l'interfaccia delle chiamate di sistema Linux. 
+\end{itemize}
+
+\subsubsection{Installazione dei cross-compilatori su Windows (x86\_64)}
+\label{par: ch_2.5.1}
+Dunque, per prima cosa dobbiamo assicurarci di installare i "binari" giusti per la cross-compilazione. Nel sottosistema Ubuntu WSL, posizionati in \texttt{/home/NomeUtente/gem5},utilizzare i seguenti comandi, uno alla volta:
+\begin{lstlisting}[style=mystyle, escapeinside={(*@}{@*)}]
+sudo apt-get update
+\end{lstlisting} 
+
+\vspace{8pt}
+\noindent
+Per l'architettura ARM:
+\begin{lstlisting}[style=mystyle, escapeinside={(*@}{@*)}]
+sudo apt-get -y install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+\end{lstlisting} 
+Per verificare la corretta installazione del cross-compilatore lanciare il seguente comando:
+\begin{lstlisting}[style=mystyle, escapeinside={(*@}{@*)}]
+aarch64-linux-gnu-gcc --version
+\end{lstlisting} 
+
+\vspace{8pt}
+\noindent
+Per l'architettura RISC-V:
+\begin{lstlisting}[style=mystyle, escapeinside={(*@}{@*)}]
+sudo apt-get -y install gcc-riscv64-linux-gnu g++-riscv64-linux-gnu
+\end{lstlisting} 
+Per verificare la corretta installazione del cross-compilatore lanciare il seguente comando:
+\begin{lstlisting}[style=mystyle, escapeinside={(*@}{@*)}]
+riscv64-linux-gnu-gcc --version
+\end{lstlisting} 
+
+\subsubsection{Installazione dei cross-compilatori su macOS (ARM)}
+I comandi rimangono identici a quelli utilizzati su x86\_64 tranne che per qualche piccolo accorgimento.
+Nel capitolo \ref{par:ch_1.2.2} è stato utilizzato docker per l'installazione del simulatore.\\
+In questo caso, i comandi andranno utilizzati dalla seguente posizione \texttt{/root/gem5}:
+\begin{lstlisting}[style=mystyle]
+root@{...}:/gem5#
+\end{lstlisting}
+Inoltre gli stessi devono essere utilizzati senza il comando "sudo" davanti poiché su docker, una volta entrati nell'ambiente, si è già un amministratore.
+
+\subsubsection{Comandi per la build del workload}
+
+
+\subsection{Esecuzione del workload per X86 (MarssX86)}
+
+
 \end{document}

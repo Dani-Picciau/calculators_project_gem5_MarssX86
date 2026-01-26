@@ -5,5 +5,17 @@
 \contentsline {subsubsection}{\numberline {1.2.2}Installazione e setup di Gem5 su macOS}{5}{subsubsection.1.2.2}%
 \contentsline {subsection}{\numberline {1.3}Installazione e setup del simulatore MarssX86}{7}{subsection.1.3}%
 \contentsline {subsubsection}{\numberline {1.3.1}Installazione e setup di MarssX86 su Windows}{7}{subsubsection.1.3.1}%
-\contentsline {subsubsection}{\numberline {1.3.2}Installazione e setup di MarssX86 su macOS}{11}{subsubsection.1.3.2}%
-\contentsline {section}{\numberline {2}Esecuzione di un workload tramite i simulatori}{13}{section.2}%
+\contentsline {subsubsection}{\numberline {1.3.2}Installazione e setup di MarssX86 su macOS}{12}{subsubsection.1.3.2}%
+\contentsline {section}{\numberline {2}Esecuzione di un workload tramite i simulatori}{15}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Definizione di "piccolo workload"}{15}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Problema metodologico}{16}{subsection.2.2}%
+\contentsline {subsubsection}{\numberline {2.2.1}Il caso Gem5 in modalità (SE)}{16}{subsubsection.2.2.1}%
+\contentsline {subsubsection}{\numberline {2.2.2}Il caso MarssX86 (FS)}{17}{subsubsection.2.2.2}%
+\contentsline {subsection}{\numberline {2.3}Strategia adottata}{17}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}Metodologia e Configurazione degli Esperimenti}{18}{subsection.2.4}%
+\contentsline {subsubsection}{\numberline {2.4.1}Matrice dei test e definizione delle Baseline}{18}{subsubsection.2.4.1}%
+\contentsline {subsection}{\numberline {2.5}Esecuzione del workload per ARM e RISC-V (Gem5)}{18}{subsection.2.5}%
+\contentsline {subsubsection}{\numberline {2.5.1}Installazione dei cross-compilatori su Windows (x86\_64)}{19}{subsubsection.2.5.1}%
+\contentsline {subsubsection}{\numberline {2.5.2}Installazione dei cross-compilatori su macOS (ARM)}{19}{subsubsection.2.5.2}%
+\contentsline {subsection}{\numberline {2.6}Esecuzione del workload per X86 (MarssX86)}{19}{subsection.2.6}%
+\contentsline {section}{\numberline {3}Analisi dei dati raccolti}{20}{section.3}%

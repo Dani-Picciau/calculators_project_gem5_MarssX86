@@ -1,0 +1,14 @@
+\documentclass[../../main_document/main.tex]{subfiles}
+\externaldocument{../../main_document/main}
+
+\begin{document}
+
+\section{Analisi dei dati raccolti}
+I dati raccolti non verranno analizzati solo in valore assoluto, ma verranno \textbf{normalizzati rispetto alla propria baseline}. Questo approccio permette di rispondere a domande del tipo: "Quale architettura beneficia maggiormente di un aumento della cache?" o "Quale ISA risulta più efficiente a parità di risorse?". 
+Il confronto finale avverrà dunque su due livelli:
+\begin{enumerate}
+    \item \textbf{Intra-ISA}: Confronto tra le tre build della stessa architettura per valutarne la scalabilità.
+    \item \textbf{Inter-ISA}: Confronto tra i rapporti di performance delle tre architetture rispetto alle rispettive baseline, per determinare l'efficienza relativa dei set di istruzioni.
+\end{enumerate}
+
+\end{document}
