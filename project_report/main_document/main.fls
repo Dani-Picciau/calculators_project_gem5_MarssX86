@@ -523,6 +523,9 @@ INPUT ../chapters/ch2_workload_execution/workload_execution.tex
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/adobe/courier/pcrb8t.tfm
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/vf/adobe/courier/pcrb8t.vf
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/adobe/courier/pcrb8r.tfm
+INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/bitstrea/charter/bchr8t.tfm
+INPUT /usr/local/texlive/2025/texmf-dist/fonts/vf/bitstrea/charter/bchr8t.vf
+INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/bitstrea/charter/bchr8r.tfm
 INPUT ../chapters/ch3_analysis_results/analisys_results.tex
 INPUT ../chapters/ch3_analysis_results/analisys_results.tex
 INPUT ../chapters/ch3_analysis_results/analisys_results.tex

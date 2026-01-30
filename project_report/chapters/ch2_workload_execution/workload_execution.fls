@@ -453,6 +453,9 @@ INPUT /usr/local/texlive/2025/texmf-dist/fonts/vf/bitstrea/charter/bchbi8t.vf
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/bitstrea/charter/bchbi8r.tfm
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/vf/bitstrea/charter/bchri8t.vf
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/bitstrea/charter/bchri8r.tfm
+INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/lm/ec-lmtk10.tfm
+INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/adobe/courier/pcrro8c.tfm
+INPUT /usr/local/texlive/2025/texmf-dist/fonts/vf/adobe/courier/pcrro8c.vf
 INPUT /Users/d.picciaustudenti.uniss.it/Desktop/uniss/Calcolatori_Elettronici/calculators_project_Gem5_MarssX86/project_report/chapters/ch2_workload_execution/workload_execution.aux
 INPUT /Users/d.picciaustudenti.uniss.it/Desktop/uniss/Calcolatori_Elettronici/calculators_project_Gem5_MarssX86/project_report/chapters/ch2_workload_execution/workload_execution.out
 INPUT /Users/d.picciaustudenti.uniss.it/Desktop/uniss/Calcolatori_Elettronici/calculators_project_Gem5_MarssX86/project_report/chapters/ch2_workload_execution/workload_execution.out
@@ -463,6 +466,7 @@ INPUT /usr/local/texlive/2025/texmf-dist/fonts/type1/bitstrea/charter/bchri8a.pf
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmmi12.pfb
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmr12.pfb
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmsy10.pfb
+INPUT /usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmtk10.pfb
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmtt12.pfb
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/type1/urw/courier/ucrb8a.pfb
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb

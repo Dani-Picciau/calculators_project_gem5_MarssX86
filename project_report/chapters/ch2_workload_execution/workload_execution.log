@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.11.28)  26 JAN 2026 12:38
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.11.28)  30 JAN 2026 12:06
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -756,7 +756,11 @@ File: t1bch.fd 2004/10/18 font definitions for T1/bch.
 File: l3backend-pdftex.def 2024-05-08 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count358
 \l__pdf_internal_box=\box87
-) (/Users/d.picciaustudenti.uniss.it/Desktop/uniss/Calcolatori_Elettronici/calculators_project_Gem5_MarssX86/project_report/chapters/ch2_workload_execution/workload_execution.aux)
+) (/Users/d.picciaustudenti.uniss.it/Desktop/uniss/Calcolatori_Elettronici/calculators_project_Gem5_MarssX86/project_report/chapters/ch2_workload_execution/workload_execution.aux
+
+LaTeX Warning: Label `par: ch_2.5.1' multiply defined.
+
+)
 \openout1 = `workload_execution.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 4.
@@ -947,27 +951,46 @@ File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 
 [4]
 
-[5] (/Users/d.picciaustudenti.uniss.it/Desktop/uniss/Calcolatori_Elettronici/calculators_project_Gem5_MarssX86/project_report/chapters/ch2_workload_execution/workload_execution.aux)
+[5]
+
+[6]
+
+[7]
+
+[8]
+LaTeX Font Info:    Font shape `TS1/pcr/m/it' in size <10.95> not available
+(Font)              Font shape `TS1/pcr/m/sl' tried instead on input line 352.
+
+
+[9]
+
+[10]
+
+[11] (/Users/d.picciaustudenti.uniss.it/Desktop/uniss/Calcolatori_Elettronici/calculators_project_Gem5_MarssX86/project_report/chapters/ch2_workload_execution/workload_execution.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
  ***********
+
+
+LaTeX Warning: There were multiply-defined labels.
+
 Package rerunfilecheck Info: File `workload_execution.out' has not changed.
-(rerunfilecheck)             Checksum: FE716E34BC15929E8B174D47CECF0EFB;3431.
+(rerunfilecheck)             Checksum: 900D0CABEA7DEBFFADEC296CD2BFF6A5;3693.
  ) 
 Here is how much of TeX's memory you used:
- 33310 strings out of 473190
- 660571 string characters out of 5715799
- 1513161 words of memory out of 5000000
- 55747 multiletter control sequences out of 15000+600000
- 610868 words of font info for 169 fonts, out of 8000000 for 9000
+ 33681 strings out of 473190
+ 665170 string characters out of 5715799
+ 1576205 words of memory out of 5000000
+ 55916 multiletter control sequences out of 15000+600000
+ 616256 words of font info for 206 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 111i,6n,120p,1168b,2120s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/local/texlive/2025/texmf-dist/fonts/type1/bitstrea/charter/bchb8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/bitstrea/charter/bchbi8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/bitstrea/charter/bchr8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/bitstrea/charter/bchri8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmmi12.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmr12.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmtt12.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/courier/ucrb8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/courier/ucrro8a.pfb>
-Output written on /Users/d.picciaustudenti.uniss.it/Desktop/uniss/Calcolatori_Elettronici/calculators_project_Gem5_MarssX86/project_report/chapters/ch2_workload_execution/workload_execution.pdf (5 pages, 160203 bytes).
+ 111i,6n,120p,1168b,2179s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</usr/local/texlive/2025/texmf-dist/fonts/type1/bitstrea/charter/bchb8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/bitstrea/charter/bchbi8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/bitstrea/charter/bchr8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/bitstrea/charter/bchri8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmmi12.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmr12.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmtk10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmtt12.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/courier/ucrb8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/courier/ucrro8a.pfb>
+Output written on /Users/d.picciaustudenti.uniss.it/Desktop/uniss/Calcolatori_Elettronici/calculators_project_Gem5_MarssX86/project_report/chapters/ch2_workload_execution/workload_execution.pdf (11 pages, 223415 bytes).
 PDF statistics:
- 249 PDF objects out of 1000 (max. 8388607)
- 194 compressed objects within 2 object streams
- 70 named destinations out of 1000 (max. 500000)
- 37637 words of extra memory for PDF output out of 42996 (max. 10000000)
+ 460 PDF objects out of 1000 (max. 8388607)
+ 395 compressed objects within 4 object streams
+ 219 named destinations out of 1000 (max. 500000)
+ 38669 words of extra memory for PDF output out of 42996 (max. 10000000)
 

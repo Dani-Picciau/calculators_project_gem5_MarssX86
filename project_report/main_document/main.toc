@@ -14,8 +14,9 @@
 \contentsline {subsection}{\numberline {2.3}Strategia adottata}{17}{subsection.2.3}%
 \contentsline {subsection}{\numberline {2.4}Metodologia e Configurazione degli Esperimenti}{18}{subsection.2.4}%
 \contentsline {subsubsection}{\numberline {2.4.1}Matrice dei test e definizione delle Baseline}{18}{subsubsection.2.4.1}%
-\contentsline {subsection}{\numberline {2.5}Esecuzione del workload per ARM e RISC-V (Gem5)}{18}{subsection.2.5}%
+\contentsline {subsection}{\numberline {2.5}Esecuzione del workload per ARM e RISC-V (Gem5)}{19}{subsection.2.5}%
 \contentsline {subsubsection}{\numberline {2.5.1}Installazione dei cross-compilatori su Windows (x86\_64)}{19}{subsubsection.2.5.1}%
-\contentsline {subsubsection}{\numberline {2.5.2}Installazione dei cross-compilatori su macOS (ARM)}{19}{subsubsection.2.5.2}%
-\contentsline {subsection}{\numberline {2.6}Esecuzione del workload per X86 (MarssX86)}{19}{subsection.2.6}%
-\contentsline {section}{\numberline {3}Analisi dei dati raccolti}{20}{section.3}%
+\contentsline {subsubsection}{\numberline {2.5.2}Installazione dei cross-compilatori su macOS (ARM)}{20}{subsubsection.2.5.2}%
+\contentsline {subsubsection}{\numberline {2.5.3}Comandi per la build del workload}{20}{subsubsection.2.5.3}%
+\contentsline {subsection}{\numberline {2.6}Esecuzione del workload per X86 (MarssX86)}{21}{subsection.2.6}%
+\contentsline {section}{\numberline {3}Analisi dei dati raccolti}{22}{section.3}%

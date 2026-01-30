@@ -126,15 +126,25 @@ Per garantire un confronto il più equo possibile nonostante queste differenze s
 Una volta stabilita la natura del workload e le modalità di simulazione, la fase sperimentale prevede l'esecuzione di una matrice di test strutturata per isolare l'impatto delle diverse configurazioni microarchitetturali.
 
 \subsubsection{Matrice dei test e definizione delle Baseline}
-Per ciascuna delle tre architetture analizzate (ARM, RISC-V e x86), verranno effettuate tre diverse build (configurazioni di simulazione), per un totale di 9 simulazioni distinte. L'obiettivo è osservare come il medesimo workload risponda alla variazione di parametri chiave (come la frequenza di clock, la dimensione delle cache o il modello di CPU).
+Per ciascuna delle tre architetture analizzate (ARM, RISC-V e x86), verranno eseguite tre diverse configurazioni di simulazione, per un totale di 9 test. L'obiettivo è isolare l'impatto del modello di esecuzione della CPU e della gerarchia di memoria sulle prestazioni del workload.
+
 
 \vspace{8pt}
 \noindent
-Per rendere il confronto significativo, all'interno di ogni gruppo architettonico viene definita una \textbf{Baseline}:
+Le varianti si basano su due modelli di processore fondamentali:
 \begin{itemize}[leftmargin=1em]
-    \item \textbf{Configurazione Baseline}: Rappresenta il punto di riferimento con parametri standard (es. configurazione di default del simulatore).
-    \item \textbf{Configurazione 2 e 3}: Rappresentano varianti in cui viene modificato un parametro specifico (ad esempio, raddoppio della cache L2 o differente modello di CPU).
+    \item \textbf{\textit{In-Order}}: un modello in cui le istruzioni vengono eseguite nell'esatto ordine in cui appaiono nel programma. È un'architettura più semplice ed efficiente dal punto di vista energetico, ma soggetta a "stalli" (blocchi) se un'istruzione deve attendere dati dalla memoria.
+    \item \textbf{\textit{Out-of-Order (OoO)}}: un modello avanzato che permette alla CPU di eseguire le istruzioni non appena le loro dipendenze sono soddisfatte, anche se non in ordine sequenziale. Questo permette di "nascondere" le latenze della memoria, ma richiede una logica hardware molto più complessa (scheduler, registri di rinomina, ecc.).
 \end{itemize}
+
+\vspace{8pt}
+\noindent
+Per ogni architettura sono state definite le seguenti tre configurazioni:
+\begin{enumerate}[leftmargin=1.3em]
+    \item \textbf{Configurazione 1 (Baseline)}: Utilizza una CPU \textbf{Out-of-Order} ad alte prestazioni. La gerarchia di memoria prevede una cache L1 da 128\,KB e una cache L2 da 2\,MB. Rappresenta il target di massima potenza computazionale.
+    \item \textbf{Configurazione 2 (CPU Efficiency Test)}: Mantiene le stesse cache della baseline (L1 128\,KB, L2 2\,MB) ma sostituisce il modello di core con una CPU \textbf{In-Order}. Questo test serve a misurare quanto l'architettura tragga beneficio dall'esecuzione fuori ordine per il particolare workload di moltiplicazione matriciale.
+    \item \textbf{Configurazione 3 (Memory Constraint Test)}: Ritorna al modello di CPU \textbf{Out-of-Order} della baseline, ma riduce drasticamente le dimensioni delle cache (L1 a 32\,KB e L2 a 256\,KB). Questo permette di osservare quanto le prestazioni siano limitate dalla capacità della memoria (memory-bound) rispetto alla potenza pura di calcolo.
+\end{enumerate}
 
 \subsection{Esecuzione del workload per ARM e RISC-V (Gem5)}
 Per poter eseguire il workload scelto sulle architetture target (ARM e RISC-V), è prima necessario affrontare il problema della compatibilità binaria. Poiché le macchine utilizzate per lo sviluppo (Host) dispongono solitamente di un set di istruzioni x86\_64 o ARM64 (Apple Silicon), i binari prodotti da un compilatore standard non sarebbero comprensibili dai simulatori configurati per architetture diverse.
@@ -149,14 +159,14 @@ In particolare, anche qualora si utilizzasse un processore Apple Silicon (già b
 
 \subsubsection{Installazione dei cross-compilatori su Windows (x86\_64)}
 \label{par: ch_2.5.1}
-Dunque, per prima cosa dobbiamo assicurarci di installare i "binari" giusti per la cross-compilazione. Nel sottosistema Ubuntu WSL, posizionati in \texttt{/home/NomeUtente/gem5},utilizzare i seguenti comandi, uno alla volta:
+Dunque, per prima cosa dobbiamo assicurarci di installare i "binari" giusti per la cross-compilazione. Nel sottosistema Ubuntu WSL, posizionati in \texttt{/home/NomeUtente/dev\_local/\ gem5}, utilizzare i seguenti comandi, uno alla volta:
 \begin{lstlisting}[style=mystyle, escapeinside={(*@}{@*)}]
 sudo apt-get update
-\end{lstlisting} 
+\end{lstlisting}  
 
 \vspace{8pt}
 \noindent
-Per l'architettura ARM:
+\textbf{\textit{Per l'architettura ARM}:}
 \begin{lstlisting}[style=mystyle, escapeinside={(*@}{@*)}]
 sudo apt-get -y install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
 \end{lstlisting} 
@@ -164,16 +174,24 @@ Per verificare la corretta installazione del cross-compilatore lanciare il segue
 \begin{lstlisting}[style=mystyle, escapeinside={(*@}{@*)}]
 aarch64-linux-gnu-gcc --version
 \end{lstlisting} 
+Infine, per compilare il file C si utilizza il seguente comando (ricordando \texttt{-static}):
+\begin{lstlisting}[style=mystyle, escapeinside={(*@}{@*)}]
+aarch64-linux-gnu-gcc -static matrix_mul.c -o matrix_mul_arm
+\end{lstlisting} 
 
 \vspace{8pt}
 \noindent
-Per l'architettura RISC-V:
+\textbf{\textit{Per l'architettura RISC-V}:} 
 \begin{lstlisting}[style=mystyle, escapeinside={(*@}{@*)}]
 sudo apt-get -y install gcc-riscv64-linux-gnu g++-riscv64-linux-gnu
 \end{lstlisting} 
 Per verificare la corretta installazione del cross-compilatore lanciare il seguente comando:
 \begin{lstlisting}[style=mystyle, escapeinside={(*@}{@*)}]
 riscv64-linux-gnu-gcc --version
+\end{lstlisting} 
+Infine, per compilare il file C si utilizza il seguente comando (ricordando \texttt{-static}):
+\begin{lstlisting}[style=mystyle, escapeinside={(*@}{@*)}]
+riscv64-linux-gnu-gcc -static matrix_mul.c -o matrix_mul_riscv
 \end{lstlisting} 
 
 \subsubsection{Installazione dei cross-compilatori su macOS (ARM)}
@@ -183,12 +201,252 @@ In questo caso, i comandi andranno utilizzati dalla seguente posizione \texttt{/
 \begin{lstlisting}[style=mystyle]
 root@{...}:/gem5#
 \end{lstlisting}
-Inoltre gli stessi devono essere utilizzati senza il comando "sudo" davanti poiché su docker, una volta entrati nell'ambiente, si è già un amministratore.
+Inoltre, gli stessi, devono essere utilizzati senza il comando \textbf{"sudo"} davanti poiché una volta entrati nell'ambiente docekr si è già un amministratore.
 
 \subsubsection{Comandi per la build del workload}
+Il comando per la build del workload (il file C) rimane invariato rispetto al calcolatore in cui viene utilizzato.\\ Ogni comando di build, all'interno di \texttt{gem5/m5out/NomeCartella}, creerà un file \texttt{.txt} che conterrà tutte le statistiche relative alla simulazione con le caratteristiche specificate.\\
+Dunque, sia che ci si trovi in \texttt{root/gem5} per macOS o in \texttt{/home/NomeUtente/\ dev\_local/gem5} su un sistema Windows i comandi saranno i seguenti:
 
+\vspace{8pt}
+\noindent
+\textbf{\textit{Le tre build per l'architettura ARM}}
+\begin{lstlisting}[style=mystyle, language= C]
+// Comando di build per la configurazione 1 (baseline)
+./build/ARM/gem5.opt --outdir=m5out/arm_baseline configs/deprecated/example/se.py \
+  --cpu-type=ArmO3CPU \
+  --caches --l2cache \
+  --l1d_size=128kB --l1i_size=128kB \
+  --l2_size=2MB \
+  --sys-clock=2.688GHz \
+  --cmd=./matrix_mul_arm
+\end{lstlisting}
+\begin{lstlisting}[style=mystyle, language= C]
+// Comando di build per la configurazione 2 (CPU efficiency test) 
+./build/ARM/gem5.opt --outdir=m5out/arm_var1_cpu configs/deprecated/example/se.py \
+  --cpu-type=ArmMinorCPU \
+  --caches --l2cache \
+  --l1d_size=12kB --l1i_size=128kB \
+  --l2_size=2MB \
+  --sys-clock=2.688GHz \
+  --cmd=./matrix_mul_arm
+\end{lstlisting}
+\begin{lstlisting}[style=mystyle, language= C]
+// Comando di build per la configurazione 3 (Memory costraint test)
+./build/ARM/gem5.opt --outdir=m5out/arm_small_cache configs/deprecated/example/se.py \
+  --cpu-type=ArmO3CPU \
+  --caches --l2cache \
+  --l1d_size=32kB --l1i_size=32kB \
+  --l2_size=256kB \
+  --sys-clock=2.688GHz \
+  --cmd=./matrix_mul_arm
+\end{lstlisting}
 
+\vspace{8pt}
+\noindent
+\textbf{\textit{Le tre build per l'architettura RISC-V}} 
+\begin{lstlisting}[style=mystyle, language= C]  
+// Comando di build per la configurazione 1 (baseline)
+./build/RISCV/gem5.opt --outdir=m5out/riscv_baseline configs/deprecated/example/se.py \
+  --cpu-type=O3CPU \
+  --caches --l2cache \
+  --l1d_size=128kB --l1i_size=128kB \
+  --l2_size=256kB\
+  --sys-clock=2.688GHz \
+  --cmd=./matrix_mul_riscv
+\end{lstlisting}
+\begin{lstlisting}[style=mystyle, language= C]
+// Comando di build per la configurazione 2 (CPU efficiency test) 
+./build/RISCV/gem5.opt --outdir=m5out/riscv_var1_cpu configs/deprecated/example/se.py \
+  --cpu-type=MinorCPU \
+  --caches --l2cache \
+  --l1d_size=128kB --l1i_size=128kB \
+  --l2_size=256kB  \
+  --sys-clock=2.688GHz \
+  --cmd=./matrix_mul_riscv
+\end{lstlisting}
+\begin{lstlisting}[style=mystyle, language= C]
+// Comando di build per la configurazione 3 (Memory costraint test)
+./build/RISCV/gem5.opt --outdir=m5out/riscv_small_cache configs/deprecated/example/se.py \
+  --cpu-type=O3CPU \
+  --caches --l2cache \
+  --l1d_size=32kB --l1i_size=32kB \
+  --l2_size=256kB \
+  --sys-clock=2.688GHz \
+  --cmd=./matrix_mul_riscv
+\end{lstlisting}
+
+\vspace{8pt}
+\noindent
+\textbf{\textit{Nota}:} cambiare O3CPU con ArmO3CPU ha senso per una questione di rigore metodologico e stabilità della simulazione per i seguenti motivi:
+\begin{itemize}[leftmargin=1em]
+    \item \textbf{Specificità del modello}: Mentre O3CPU è un'etichetta generica, ArmO3CPU forza il simulatore a usare parametri di pipeline 
+	(come la profondità degli stadi e la dimensione del Reorder Buffer) specificamente modellati sulle caratteristiche delle CPU ARM;
+    \item \textbf{Versioni future}: Il file se.py è considerato "deprecated". 
+	Nelle versioni più recenti di Gem5, l'automazione che associa O3CPU ad ArmO3CPU potrebbe essere rimossa, 
+	rendendo il comando generico non funzionante.
+\end{itemize}
+
+\vspace{8pt}
+\noindent
+Questa cosa non vale in RISC-V dove il binario “build/RISCV/gem5.opt” contiene solo l’implementazione RISC-V quindi O3CPU non può essere altro che un processore
+RISC-V.
+ 
 \subsection{Esecuzione del workload per X86 (MarssX86)}
+A causa dell'architettura di MarssX86, che si basa su una versione datata di QEMU, l'interazione standard con il simulatore presenta significative limitazioni operative per l'esecuzione di benchmark automatizzati.
+
+\vspace{8pt}
+\noindent
+Inizialmente, la procedura standard prevedeva un intervento manuale dell'utente: era necessario avviare il workload nel sistema guest e, simultaneamente, inviare un comando al monitor di QEMU (tramite una combinazione di tasti rapida) per attivare la registrazione delle statistiche (simconfig -run). Questo approccio presentava due criticità fondamentali:
+\begin{itemize}[leftmargin=1em]
+    \item \textbf{Mancanza di Determinismo}: Il tempo di reazione umano nell'impartire il comando di avvio non è costante. Questo rendeva impossibile sincronizzare perfettamente l'inizio della registrazione con l'inizio del calcolo matematico;
+    \item \textbf{Inquinamento dei Dati (\textit{"Noise"})}: Per dare all'utente il tempo fisico di attivare il simulatore, era necessario inserire nel codice C delle funzioni di ritardo (come sleep()) o loop a vuoto prima del calcolo. Tuttavia, il simulatore, essendo cycle-accurate, registrava anche questi cicli di attesa (fino a 160 milioni di cicli inutili nei test preliminari), falsando drasticamente metriche chiave come l'IPC (Instructions Per Cycle) e il conteggio totale delle istruzioni.
+\end{itemize}
+
+\vspace{8pt}
+\noindent
+Per ovviare a queste problematiche e garantire la rigorosità scientifica dei dati, è stato necessario implementare una metodologia basata sulla \textbf{Region of Interest (ROI)}.\\
+Questa tecnica sposta il controllo della simulazione dall'utente direttamente al codice sorgente.\\ 
+Tramite l'inclusione della libreria specifica ptlcalls.h e l'uso di "hypercalls" (istruzioni speciali che comunicano direttamente con l'hardware simulato), è il benchmark stesso a ordinare al simulatore di accendersi (ptlcall\_switch\_to\_sim) esattamente un istante prima dell'inizio dell'algoritmo di moltiplicazione e di spegnersi (ptlcall\_switch\_to\_native) appena terminato.
+
+\vspace{8pt}
+\noindent
+In questo modo, abbiamo eliminato completamente l'errore umano e il rumore di fondo, ottenendo misurazioni che riflettono esclusivamente il carico di lavoro computazionale oggetto di studio.
+
+\subsubsection{Implementazione della metodologia ROI}
+Dal momento in cui sta venendo utilizzato docker per entrambi i sistemi macOS e Windows, la procedura da eseguire rimane invariata. Possiamo suddividere la procedura in alcuni passi:
+\begin{itemize}[leftmargin=1em]
+    \item \textbf{\textit{Passo 1}: ottenimento della libreria \texttt{ptlcall.h}} \\
+    Subito dopo essere entrati nel container è necessario lanciare un comando per copiare il file \texttt{ptcalls.h} all'interno della cartella "disks".
+    \begin{lstlisting}[style=mystyle, language= C]
+root@{...}:~/marss# cp /root/marss/marss/ptlsim/tools/ptlcalls.h /root/marss/disks/
+    \end{lstlisting}
+
+    \vspace{8pt}
+    \item \textbf{\textit{Passo 2}: modifica del codice C}\\
+    Il codice C rimarrà simile a quello utilizzato per l'esecuzione del workload con Gem5: verranno aggiunte solamente delle righe in più per poter aggiungere le librerie descritte prima. Per fare ciò, si utilizza il seguente comando:
+    \begin{lstlisting}[style=mystyle, language= C]
+root@{...}:~/marss# cd marss/disks
+    \end{lstlisting}
+    \begin{lstlisting}[style=mystyle, language= C]
+root@{...}:~/marss/marss/disks# cat > matrix_mul.c <<EOF
+#include <stdio.h>
+#include <stdlib.h>
+#include "ptlcalls.h" // La libreria per il controllo ROI
+
+#define N 64 
+
+void matrix_multiply(double *A, double *B, double *C, int size) {
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            double sum = 0.0;
+            for (int k = 0; k < size; k++) {
+                sum += A[i * size + k] * B[k * size + j];
+            }
+            C[i * size + j] = sum;
+        }
+    }
+}
+
+int main() {
+    // Usiamo static invece di malloc per evitare crash nell'ambiente statico
+    // La dimensione e' N*N * sizeof(double), gestita automaticamente
+    static double A[N * N];
+    static double B[N * N];
+    static double C[N * N];
+
+    printf("Inizializzazione dati (Veloce)...\n");
+
+    // Inizializzazione deterinistica
+    for (int i = 0; i < N * N; i++) {
+        A[i] = 1.0;
+        B[i] = 2.0;
+    }
+
+    printf("--- ATTIVO LA SIMULAZIONE ORA ---\n");
+    printf("(Il computer rallentera' drasticamente per simulare i calcoli floating point)\n");
+
+    // === START ROI ===
+    // Qui inizia la misurazione precisa
+    ptlcall_switch_to_sim();
+
+    matrix_multiply(A, B, C, N);
+
+    // === STOP ROI ===
+    // Qui finisce la misurazione
+    ptlcall_switch_to_native();
+
+    printf("--- SIMULAZIONE TERMINATA ---\n");
+    printf("Benchmark Completato! Risultato cella 0: %f\n", C[0]);
+
+    return 0;
+}
+EOF
+    \end{lstlisting}
+
+    \vspace{8pt}
+    \item \textbf{\textit{Passo 3}: compilazione del file C}\\
+    Per effettuare la compilazione di \texttt{matrix\_mul.c}, eseguire i seguenti comandi uno alla volta:
+    \begin{lstlisting}[style=mystyle]
+root@{...}:~/marss/marss/disks# rm matrix_mul 2>/dev/null
+    \end{lstlisting}
+    Prima di installare il compilatore per i file C è necessario installare alcune librerie:
+    \begin{lstlisting}[style=mystyle]
+root@{...}:~/marss/marss/disks# apt-get update
+    \end{lstlisting}
+    \begin{lstlisting}[style=mystyle]
+root@{...}:~/marss/marss/disks# apt-get install musl-tools musl-dev    
+    \end{lstlisting}
+    Non appena le librerie sono state installate, far partire il comando di compilazione:
+    \begin{lstlisting}[style=mystyle]
+root@{...}:~/marss/marss/disks# gcc -std=gnu99 -D_GNU_SOURCE -static -nostartfiles -nostdinc \
+     -I . \
+     -I /usr/include/x86_64-linux-musl \
+     -L /usr/lib/x86_64-linux-musl \
+     /usr/lib/x86_64-linux-musl/crt1.o \
+     /usr/lib/x86_64-linux-musl/crti.o \
+     matrix_mul.c \
+     /usr/lib/x86_64-linux-musl/crtn.o \
+    -lc -o matrix_mul  
+    \end{lstlisting}
+    Poiché l'ambiente virtualizzato (Guest) è isolato dal sistema ospitante (Host), è necessario creare un meccanismo di trasferimento per l'eseguibile compilato.\\
+    Quindi, tramite l'utility genisoimage, il file binario del benchmark (file C) viene incapsulato in un'immagine disco standard (ISO 9660). Questa immagine viene successivamente montata come unità CD-ROM virtuale all'avvio di QEMU, permettendo al sistema operativo Debian di leggere e copiare il file al suo interno.
+    \begin{lstlisting}[style=mystyle]
+root@{...}:~/marss/marss/disks# rm trasferimento.iso
+    \end{lstlisting}
+    \begin{lstlisting}[style=mystyle]
+root@{...}:~/marss/marss/disks# genisoimage -o trasferimento.iso matrix_mul
+    \end{lstlisting}
+
+    \vspace{8pt}
+    \item \textbf{\textit{Passo 4}: configurazione delle CPU e delle Cache}\\
+    L'ultimo passaggio prima di procedere con l'esecuzione del workload è leggermente macchinoso. Infatti con il simulatore MarssX86 non è possibile specificare le tipologie di CPU o di Cache direttamente nel comando di build del workload (come si è fatto con Gem5) ma è necessario configurare alcuni file.
+
+    \vspace{8pt}
+    \noindent
+    \textbf{\textit{Scelta della CPU}}\\
+    Posizionati in \texttt{/root/marss/marss}, si andrà a creare una cartella \textit{"my\_configs"} all'interno della quale si andranno a inserire dei file per specificare il tipo di CPU che si vuole utilizzare in base alla configurazione che si vuole buildare:
+    \begin{itemize}[leftmargin=1em, label=\raisebox{0.4ex}{\phantom{2}\rule{0.6ex}{0.6ex}}]
+        \item \textbf{\textit{baseline.cfg}}: viene utilizzato per la configurazione baseline. All'interno di esso è specificata una CPU di tipo out-of-order (\texttt{-machine single\_core});
+        \item \textbf{\textit{atom\_core.cfg}}: viene utilizzato per la configurazione CPU efficency test. All'interno di esso è specificata una CPU in-order (\texttt{-machine atom\_core});
+        \item \textbf{\textit{small\_cache.cfg}}: viene utilizzato per la configurazione memory constraints test.\\ All'interno di esso viene specificata la stessa CPU out-of-order della baseline poiché in questo caso ciò che cambia è la dimensione delle Cache.
+    \end{itemize}
+
+    \vspace{8pt}
+    \noindent
+    \textbf{\textit{Scelta delle Cache L1 ed L2}}\\
+    All'avvio di QEMU, le Cache L1 e L2 vengono preimpostate rispettivamente a 128KB e 2MB.\\
+    Ciò significa che se si volessero utilizzare delle Cache più piccole, è necesario ricompilare il simulatore prima dell'avvio di QEMU.\\
+    Per fare ciò vengono utilizzati i seguenti comandi (posizionati in \texttt{root/marss/marss})
+    \begin{lstlisting}[style=mystyle]
+root@{...}:~/marss/marss# sed -i 's/SIZE: 128K/SIZE: 32K/g' config/l1_cache.conf
+root@{...}:~/marss/marss# sed -i 's/SIZE: 2M/SIZE: 256K/g' config/l2_cache.conf
+    \end{lstlisting}
+\end{itemize}
+
+
+
+
+
 
 
 \end{document}

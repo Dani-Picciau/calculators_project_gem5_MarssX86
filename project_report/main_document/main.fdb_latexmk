@@ -1,7 +1,7 @@
 # Fdb version 4
-["pdflatex"] 1769427158.6924 "/Users/d.picciaustudenti.uniss.it/Desktop/uniss/Calcolatori_Elettronici/calculators_project_Gem5_MarssX86/project_report/main_document/main.tex" "main.pdf" "main" 1769427160.10957 0
+["pdflatex"] 1769595922.50826 "/Users/d.picciaustudenti.uniss.it/Desktop/uniss/Calcolatori_Elettronici/calculators_project_Gem5_MarssX86/project_report/main_document/main.tex" "main.pdf" "main" 1769595924.01456 0
   "../chapters/ch1_installation_setup/installation_setup.tex" 1769427021.83933 38206 81188f03368c7a2690374afd9f8eed20 ""
-  "../chapters/ch2_workload_execution/workload_execution.tex" 1769427140.6728 13554 20f5f55d86bbeee961a6cb4f5c2f87b2 ""
+  "../chapters/ch2_workload_execution/workload_execution.tex" 1769595901.06454 18726 6b410eab87108796e379626ef12e0340 ""
   "../chapters/ch3_analysis_results/analisys_results.tex" 1769274740.87723 882 56877d0388fb329cd0d45f1615e9ed1c ""
   "../chapters/index/index.tex" 1768919708.38678 1060 022a1fbb886db982432f3a0c90b9f984 ""
   "../figures/../figures/chapter1_figures/img1.png" 1768427301.68576 12413 44d971560e500fde527b73f2b7c6fa4e ""
@@ -276,10 +276,10 @@
   "/usr/local/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1764288388 5467155 19efa205003f9ecad95fbbaa6ff24da1 ""
   "/usr/local/texlive/2025/texmf-var/web2c/pdftex/pdflatex.fmt" 1764288316 3345743 71640d6abb0540349421d01c5cd0a99f ""
   "/usr/local/texlive/2025/texmf.cnf" 1741450484 577 418a7058ec8e006d8704f60ecd22c938 ""
-  "main.aux" 1769427160.01007 5334 8e3395b6d67bc8046968dd443523bf3c "pdflatex"
-  "main.out" 1769427160.01103 5777 d5ac645c44af196731b1536e3dd3e369 "pdflatex"
+  "main.aux" 1769595923.91601 5604 ad0ec38936e0d1891724e542334c2944 "pdflatex"
+  "main.out" 1769595923.91701 6025 776b7717851d4be61ddd2a86083d043b "pdflatex"
   "main.tex" 1769274691.08412 397 08eab6c72c202d535fc693d27bec548b ""
-  "main.toc" 1769427160.01127 2298 16ebbf79c42127ab21badc5cbda055e2 "pdflatex"
+  "main.toc" 1769595923.91731 2408 f7f708190ebefa3b44b7faaee1cd40b4 "pdflatex"
   (generated)
   "main.aux"
   "main.log"
