@@ -313,6 +313,7 @@ Tramite l'inclusione della libreria specifica ptlcalls.h e l'uso di "hypercalls"
 In questo modo, abbiamo eliminato completamente l'errore umano e il rumore di fondo, ottenendo misurazioni che riflettono esclusivamente il carico di lavoro computazionale oggetto di studio.
 
 \subsubsection{Implementazione della metodologia ROI}
+\label{par: ch_2.6.1}
 Dal momento in cui sta venendo utilizzato docker per entrambi i sistemi macOS e Windows, la procedura da eseguire rimane invariata. Possiamo suddividere la procedura in alcuni passi:
 \begin{itemize}[leftmargin=1em]
     \item \textbf{\textit{Passo 1}: ottenimento della libreria \texttt{ptlcall.h}} \\
@@ -328,7 +329,7 @@ root@{...}:~/marss# cp /root/marss/marss/ptlsim/tools/ptlcalls.h /root/marss/dis
 root@{...}:~/marss# cd marss/disks
     \end{lstlisting}
     \begin{lstlisting}[style=mystyle, language= C]
-root@{...}:~/marss/marss/disks# cat > matrix_mul.c <<EOF
+root@{...}:~/marss/marss/disks# cat > matrix_m.c <<EOF
 #include <stdio.h>
 #include <stdlib.h>
 #include "ptlcalls.h" // La libreria per il controllo ROI
@@ -424,27 +425,132 @@ root@{...}:~/marss/marss/disks# genisoimage -o trasferimento.iso matrix_mul
     \vspace{8pt}
     \noindent
     \textbf{\textit{Scelta della CPU}}\\
-    Posizionati in \texttt{/root/marss/marss}, si andrà a creare una cartella \textit{"my\_configs"} all'interno della quale si andranno a inserire dei file per specificare il tipo di CPU che si vuole utilizzare in base alla configurazione che si vuole buildare:
+    Posizionati in \texttt{/root/marss/marss}, si andrà a creare una cartella \textit{"my\_configs"} all'interno della quale si inseriranno dei file che, oltre a specificare \textbf{il tipo di CPU} che si vuole utilizzare in base alla configurazione che si vuole buildare, presenta anche ulteriori comandi per \textbf{indicare alla distribuzione che file creare per salvare le informazioni importanti} relative al workload eseguito.\\
+    Proprio per questo motivo si rende necessario creare un ulteriore cartella dove salvare i file delle statistiche:
+    \begin{lstlisting}[style=mystyle, language=C]
+root@{...}:~/marss/marss# mkdir results
+    \end{lstlisting}
+
+    \vspace{8pt}
+    \noindent
+    Ogni file presenta una configurazione di questo tipo:
+        \begin{lstlisting}[style=mystyle, language=C]
+-machine <tipo_di_cpu>
+-logfile results/<nome_configurazione>.log 
+-stats results/cache_<nome_configurazione>.txt 
+-loglevel 2 
+        \end{lstlisting}
+    All'interno di \texttt{<nome\_configurazione>.log} vengono inserite le informazioni riguardanti cicli per istruzione (CPI), istruzioni per ciclo (IPC), tempo di simulazione, cicli di cpu e numero istruzioni, ecc\dots, invece, all'interno di \texttt{cache\_<nome\_configurazione>.txt}, vengono inserite, tra le altre, le informazioni riguardanti i Cache hit e i Cache miss di L1 e L2.
+
+    \vspace{8pt}
+    \noindent
     \begin{itemize}[leftmargin=1em, label=\raisebox{0.4ex}{\phantom{2}\rule{0.6ex}{0.6ex}}]
-        \item \textbf{\textit{baseline.cfg}}: viene utilizzato per la configurazione baseline. All'interno di esso è specificata una CPU di tipo out-of-order (\texttt{-machine single\_core});
-        \item \textbf{\textit{atom\_core.cfg}}: viene utilizzato per la configurazione CPU efficency test. All'interno di esso è specificata una CPU in-order (\texttt{-machine atom\_core});
+        \item \textbf{\textit{baseline.cfg}}: viene utilizzato per la configurazione baseline. All'interno di esso, è specificata una CPU di tipo out-of-order, scrivendo (\texttt{-machine single\_core});
+        \begin{lstlisting}[style=mystyle, language=C]
+-machine single_core
+-logfile results/baseline.log 
+-stats results/stats_baseline.txt 
+-loglevel 2
+        \end{lstlisting}
+        \item \textbf{\textit{atom\_core.cfg}}: viene utilizzato per la configurazione CPU efficency test. All'interno di esso è specificata una CPU in-order, scrivendo (\texttt{-machine atom\_core});
+        \begin{lstlisting}[style=mystyle, language=C]
+-machine atom_core
+-logfile results/atom_core.log
+-stats results/cache_atom.txt
+-loglevel 2
+        \end{lstlisting}
         \item \textbf{\textit{small\_cache.cfg}}: viene utilizzato per la configurazione memory constraints test.\\ All'interno di esso viene specificata la stessa CPU out-of-order della baseline poiché in questo caso ciò che cambia è la dimensione delle Cache.
+        \begin{lstlisting}[style=mystyle, language=C]
+-machine single_core
+-logfile results/small_caches.log
+-stats results/cache_smallC.txt
+-loglevel 2
+        \end{lstlisting}
     \end{itemize}
+    \vspace{8pt}
+    \noindent 
+    \textbf{\textit{Note}}: se non viene resa possibile la creazione dei file tramite interfaccia grafica è necessario crearli direttamente da riga di comando utilizzando il comando "sudo".
 
     \vspace{8pt}
     \noindent
     \textbf{\textit{Scelta delle Cache L1 ed L2}}\\
     All'avvio di QEMU, le Cache L1 e L2 vengono preimpostate rispettivamente a 128KB e 2MB.\\
-    Ciò significa che se si volessero utilizzare delle Cache più piccole, è necesario ricompilare il simulatore prima dell'avvio di QEMU.\\
+    Ciò significa che, dopo la build della prima e della seconda configurazione (entrambe con gli stessi valori di Cache L1 ed L2), per utilizzare delle delle Cache più piccole per la terza configurazione, sarà necesario ricompilare il simulatore prima dell'avvio di QEMU.\\
     Per fare ciò vengono utilizzati i seguenti comandi (posizionati in \texttt{root/marss/marss})
     \begin{lstlisting}[style=mystyle]
 root@{...}:~/marss/marss# sed -i 's/SIZE: 128K/SIZE: 32K/g' config/l1_cache.conf
 root@{...}:~/marss/marss# sed -i 's/SIZE: 2M/SIZE: 256K/g' config/l2_cache.conf
     \end{lstlisting}
+    Successivamente è necessario pulire la vecchia compilazione per forzare la creazione del nuovo "binario" di compilazione, tramite il comando:
+    \begin{lstlisting}[style=mystyle]
+root@{...}:~/marss/marss# scons -c
+    \end{lstlisting}
+    Infine, si rieffettua la compilazione per apportare le modifiche sulle Cache:
+    \begin{lstlisting}[style=mystyle]
+root@{...}:~/marss/marss# scons -Q C=1 debug=0
+    \end{lstlisting}
 \end{itemize}
 
+\subsubsection{Comandi per la build del workload} 
+Dopo aver configurato i file per le CPU e capito come impostare le Cache, si può finalmente passare alle build del workload.
 
+\vspace{8pt}
+\noindent
+\textbf{\textit{Configurazione 1: baseline}}
+\begin{lstlisting}[style=mystyle, language= C]
+// Comando di build per la configurazione 1 (baseline)
+root@{...}:~/marss/marss# ./qemu/qemu-system-x86_64 -m 1G \
+ -hda /root/marss/disks/debian_old.qcow2 \
+ -cdrom /root/marss/disks/trasferimento.iso \
+ -nographic \
+ -simconfig my_configs/baseline.cfg
+\end{lstlisting}
+Successivamente verranno chieste le credenziali per l'accesso all'interno di debian (username: root, password root) e si entrerà all'interno della distribuzione. Una volta dentro si monta il CD e si copia il file:
+\begin{lstlisting}[style=mystyle, language= C]
+root@debian-amd64:~# mount /dev/cdrom /mnt
+\end{lstlisting}
+\begin{lstlisting}[style=mystyle, language= C]
+root@debian-amd64:~# cp /mnt/matrix_m .
+\end{lstlisting}
+Si danno i permessi di esecuzione, e poi si lancia:
+\begin{lstlisting}[style=mystyle, language= C]
+root@debian-amd64:~# chmod +x matrix_m
+\end{lstlisting}
+\begin{lstlisting}[style=mystyle, language= C]
+root@debian-amd64:~# ./matrix_m
+\end{lstlisting}
+Arrivati a questo punto la build del workload è terminata e si può procedere con l'uscire dalla distribuzione e tornare al container tramite il seguente comando:
+\begin{lstlisting}[style=mystyle, language= C]
+root@debian-amd64:~# poweroff
+\end{lstlisting}
+Le statistiche della build verrano salvate all'interno dei file specificati al {\textit{"passo 4"}} in \textbf{"Scelta della CPU"} del capitolo \ref{par: ch_2.6.1}.
 
+\vspace{8pt}
+\noindent
+\textbf{\textit{Configurazione 2: CPU efficiency test}}
+\begin{lstlisting}[style=mystyle, language= C]
+// Comando di build per la configurazione 2 (CPU efficiency test) 
+root@{...}:~/marss/marss# ./qemu/qemu-system-x86_64 -m 1G \
+ -hda /root/marss/disks/debian_old.qcow2 \
+ -cdrom /root/marss/disks/trasferimento.iso \
+ -nographic \
+ -simconfig my_configs/atom_core.cfg
+\end{lstlisting}
+Dopo aver fatto partire la distribuzione con la CPU specificata, il procedimento da seguire per l'esecuzione del workload è il medesimo della \textbf{\textit{Configurazione baseline}}.
+
+\vspace{8pt}
+\noindent
+\textbf{\textit{Configurazione 3: Memory costraint test}}\\
+In questo caso, dato che si vogliono utilizzare dei valori di Cache L1 e L2 differenti, prima di far partire la distribuzione con il comando sotto specificato, è necessario seguire il procedimento descritto al \textbf{\textit{"passo 4"}} in \textbf{"Scelta delle Cache L1 e L2"} del capitolo \ref{par: ch_2.6.1}.
+\begin{lstlisting}[style=mystyle, language= C]
+// Comando di build per la configurazione 3 (Memory costraint test)
+root@{...}:~/marss/marss# ./qemu/qemu-system-x86_64 -m 1G \
+ -hda /root/marss/disks/debian_old.qcow2 \
+ -cdrom /root/marss/disks/trasferimento.iso \
+ -nographic \
+ -simconfig my_configs/small_cache.cfg
+\end{lstlisting}
+Dopo aver fatto partire la distribuzione con la CPU specificata, il procedimento da seguire per l'esecuzione del workload è il medesimo della \textbf{\textit{Configurazione baseline}}. 
 
 
 
